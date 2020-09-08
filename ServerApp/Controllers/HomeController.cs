@@ -21,13 +21,23 @@ namespace ServerApp.Controllers
         public IActionResult Index()
         {
             IActionResult iActionResult;
-            ViewResult viewResult;
-            string viewName = "Placeholder";
+            bool usePlaceHolder;
 
-            //  The default ActionResult will be the Placeholder view.
-            viewResult = View( viewName );
-            iActionResult = viewResult;
+            usePlaceHolder = false;
+            if (usePlaceHolder)
+            {
+                ViewResult viewResult;
+                string viewName = "Placeholder";
 
+                //  The default ActionResult will be the Placeholder view.
+                viewResult = View(viewName);
+                iActionResult = viewResult;
+            }
+            else
+            {
+                //  Return the default view.
+                iActionResult = View();
+            }
             return ( iActionResult );
         }
 

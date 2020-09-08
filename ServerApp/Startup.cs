@@ -54,30 +54,18 @@ namespace ServerApp
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            //app.UseSpa(spa =>
-            //{
-            //    //  The following works!
-            //    spa.Options.SourcePath = "../../SportsStore/ClientApp";
-
-            //    //  The following fails!
-            //    //spa.Options.SourcePath = "../ClientApp";
-
-            //    spa.UseAngularCliServer(npmScript: "start");
-            //});
-
             app.UseSpa(spa =>
             {
                 string strategy = Configuration.GetValue<string>("DevTools:ConnectionStrategy");
 
-                Uri angularServerUri = new Uri("http://127.0.0.1:4200");
                 if( strategy == "proxy")
                 {
+                    Uri angularServerUri = new Uri("http://127.0.0.1:4200");
                     spa.UseProxyToSpaDevelopmentServer(angularServerUri);
                 }
                 else if( strategy == "managed" )
                 {
-                    //  The following works!
-                    spa.Options.SourcePath = "../../SportsStore/ClientApp";
+                    spa.Options.SourcePath = "../ClientApp";
 
                     spa.UseAngularCliServer(npmScript: "start");
                 }
