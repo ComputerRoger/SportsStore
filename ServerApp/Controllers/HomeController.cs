@@ -11,33 +11,24 @@ namespace ServerApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        //private readonly ILogger<HomeController> _logger;
+        private DataContext dataContext;
 
-        public HomeController(ILogger<HomeController> logger)
+        //public HomeController(ILogger<HomeController> logger)
+        //{
+        //    _logger = logger;
+        //}
+        public HomeController( DataContext dataContext )
         {
-            _logger = logger;
+            this.dataContext = dataContext;
         }
 
         public IActionResult Index()
         {
             IActionResult iActionResult;
-            bool usePlaceHolder;
 
-            usePlaceHolder = false;
-            if (usePlaceHolder)
-            {
-                ViewResult viewResult;
-                string viewName = "Placeholder";
-
-                //  The default ActionResult will be the Placeholder view.
-                viewResult = View(viewName);
-                iActionResult = viewResult;
-            }
-            else
-            {
-                //  Return the default view.
-                iActionResult = View();
-            }
+            //  Return the default view.
+            iActionResult = View( dataContext.Products.First() );
             return ( iActionResult );
         }
 

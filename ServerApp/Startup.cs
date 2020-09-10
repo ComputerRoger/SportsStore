@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using ServerApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ServerApp
 {
@@ -24,11 +26,16 @@ namespace ServerApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //  Ensure that seed data is applied when ASP.Net Core starts.
+            string connectionString = Configuration["ConnectionStrings:DefaultConnection"];
+            services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+
             services.AddControllersWithViews();
+            services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider )
         {
             if (env.IsDevelopment())
             {
@@ -74,6 +81,8 @@ namespace ServerApp
                     //  Do nothing.
                 }
             });
+
+            SeedData.SeedDatabase(serviceProvider.GetRequiredService<DataContext>());
         }
     }
 }
