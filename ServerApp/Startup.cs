@@ -82,7 +82,10 @@ namespace ServerApp
                 }
             });
 
-            SeedData.SeedDatabase(serviceProvider.GetRequiredService<DataContext>());
+            //  Seed the database with initial data if it is empty.
+            DataContext dataContext;
+            dataContext = serviceProvider.GetRequiredService<DataContext>();
+            SeedData.SeedDatabase(dataContext);
         }
     }
 }
