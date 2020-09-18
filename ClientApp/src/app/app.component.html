@@ -1,40 +1,57 @@
 <h2>SportsStore Angular Top</h2>
 <span>Angular Content Will Go Here ... Hello!</span>
 
-<div class= "p-2">
-  <table class="table-light table-sm">
-    <tr>
-      <th>
-        Name
-      </th>
-      <td>
-        {{product?.name}}
-      </td>
-    </tr>
-    <tr>
-      <th>
-        Category
-      </th>
-      <td>
-        {{product?.category}}
-      </td>
-    </tr>
-    <tr>
-      <th>
-        Description
-      </th>
-      <td>
-        {{product?.description}}
-      </td>
-    </tr>
-    <tr>
-      <th>
-        Price
-      </th>
-      <td>
-        {{product?.price}}
-      </td>
-    </tr>
-  </table>
+<div class="p-2">
+	<table class="table table-sm table-striped">
+		<tbody>
 
+			<tr>
+				<th>
+					Name
+				</th>
+				<th>
+					Category
+				</th>
+				<th>
+					Description
+				</th>
+				<th>
+					Price
+				</th>
+				<th>
+					Supplier
+				</th>
+				<th>
+					Ratings
+				</th>
+			</tr>
+			<tr *ngFor="let product of products">
+				<td>
+					{{product.name || 'Loading Data... ' }}
+				</td>
+				<td>
+					{{product.category}}
+				</td>
+				<td>
+					{{product.description}}
+				</td>
+				<td>
+					{{product.price}}
+				</td>
+				<td>
+					{{product.supplier?.name || 'None'}}
+				</td>
+				<td>
+					{{product.ratings?.length || 0}}
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<button class="btn btn-primary m-1" (click)="createProduct()">Create a Product</button>
+	<button class="btn btn-primary m-1" (click)="createProductAndSupplier()">Create Product and Supplier</button>
+	<button class="btn btn-primary m-1" (click)="replaceProduct()">Replace the first Product</button>
+	<button class="btn btn-primary m-1" (click)="replaceSupplier()">Replace Supplier</button>
+	<button class="btn btn-primary m-1" (click)="updateProduct()">Patch first Product</button>
+	<button class="btn btn-primary m-1" (click)="deleteProduct()">Delete Product1</button>
+	<button class="btn btn-primary m-1" (click)="deleteSupplier()">Delete Supplier2</button>
 </div>

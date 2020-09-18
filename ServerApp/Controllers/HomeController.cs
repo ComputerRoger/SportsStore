@@ -12,7 +12,7 @@ namespace ServerApp.Controllers
     public class HomeController : Controller
     {
         //private readonly ILogger<HomeController> _logger;
-        private DataContext dataContext;
+        private DataContext m_DataContext;
 
         //public HomeController(ILogger<HomeController> logger)
         //{
@@ -20,7 +20,7 @@ namespace ServerApp.Controllers
         //}
         public HomeController( DataContext dataContext )
         {
-            this.dataContext = dataContext;
+            this.m_DataContext = dataContext;
         }
 
         public IActionResult Index()
@@ -28,7 +28,7 @@ namespace ServerApp.Controllers
             IActionResult iActionResult;
 
             //  Return the default view.
-            iActionResult = View( dataContext.Products.First() );
+            iActionResult = View( m_DataContext.Products.First() );
             return ( iActionResult );
         }
 

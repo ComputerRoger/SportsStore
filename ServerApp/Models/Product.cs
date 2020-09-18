@@ -16,6 +16,8 @@ namespace ServerApp.Models
         [Column(TypeName = "decimal(8,2)")]
         public decimal Price { get; set; }
 
+		//	Supplier is a object property instead of SupplierId.
+		//	EF will make the database schema with a relationship.
         public Supplier Supplier { get; set; }
 
         public List<Rating> Ratings { get; set; }

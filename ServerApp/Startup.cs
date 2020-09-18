@@ -11,81 +11,105 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using ServerApp.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace ServerApp
 {
-    public class Startup
-    {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+	public class Startup
+	{
+		public Startup(IConfiguration configuration)
+		{
+			Configuration = configuration;
+		}
 
-        public IConfiguration Configuration { get; }
+		public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            //  Ensure that seed data is applied when ASP.Net Core starts.
-            string connectionString = Configuration["ConnectionStrings:DefaultConnection"];
-            services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
+		{
+			//  Ensure that seed data is applied when ASP.Net Core starts.
+			string connectionString = Configuration["ConnectionStrings:DefaultConnection"];
+			services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
 
-            services.AddControllersWithViews();
-            services.AddRazorPages();
-        }
+			//services.AddControllersWithViews();
+			//	Add additional instructions to tell the JSON serializer to omit properties that are null.
+			services.AddControllersWithViews()
+				.AddJsonOptions( option =>
+				{
+					option.JsonSerializerOptions.IgnoreNullValues = true;
+				} ).AddNewtonsoftJson();
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider )
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+			services.AddRazorPages();
 
-            app.UseRouting();
+			//	Provide a description of the web service.
+			services.AddSwaggerGen(options =>
+			{
+				options.SwaggerDoc("v1", new OpenApiInfo
+				{
+					Title = "Sports Store API",
+					Version = "v1"
+				});
+			});
+		}
 
-            app.UseAuthorization();
+		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+		{
+			if (env.IsDevelopment())
+			{
+				app.UseDeveloperExceptionPage();
+			}
+			else
+			{
+				app.UseExceptionHandler("/Home/Error");
+				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+				app.UseHsts();
+			}
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
+			app.UseRouting();
 
-            app.UseSpa(spa =>
-            {
-                string strategy = Configuration.GetValue<string>("DevTools:ConnectionStrategy");
+			app.UseAuthorization();
 
-                if( strategy == "proxy")
-                {
-                    Uri angularServerUri = new Uri("http://127.0.0.1:4200");
-                    spa.UseProxyToSpaDevelopmentServer(angularServerUri);
-                }
-                else if( strategy == "managed" )
-                {
-                    spa.Options.SourcePath = "../ClientApp";
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllerRoute(
+					name: "default",
+					pattern: "{controller=Home}/{action=Index}/{id?}");
+			});
 
-                    spa.UseAngularCliServer(npmScript: "start");
-                }
-                else
-                {
-                    //  Do nothing.
-                }
-            });
+			app.UseSwagger();
+			app.UseSwaggerUI(options =>
+			{
+				options.SwaggerEndpoint("/swagger/v1/swagger.json", "SportsStore API");
+			});
 
-            //  Seed the database with initial data if it is empty.
-            DataContext dataContext;
-            dataContext = serviceProvider.GetRequiredService<DataContext>();
-            SeedData.SeedDatabase(dataContext);
-        }
-    }
+			app.UseSpa(spa =>
+			{
+				string strategy = Configuration.GetValue<string>("DevTools:ConnectionStrategy");
+
+				if (strategy == "proxy")
+				{
+					Uri angularServerUri = new Uri("http://127.0.0.1:4200");
+					spa.UseProxyToSpaDevelopmentServer(angularServerUri);
+				}
+				else if (strategy == "managed")
+				{
+					spa.Options.SourcePath = "../ClientApp";
+
+					spa.UseAngularCliServer(npmScript: "start");
+				}
+				else
+				{
+					//  Do nothing.
+				}
+			});
+
+			//  Seed the database with initial data if it is empty.
+			DataContext dataContext;
+			dataContext = serviceProvider.GetRequiredService<DataContext>();
+			SeedData.SeedDatabase(dataContext);
+		}
+	}
 }
