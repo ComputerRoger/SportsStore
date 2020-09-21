@@ -1,0 +1,33 @@
+<table class="table-light table-striped">
+	<tbody>
+		<tr>
+			<th>
+				Name
+			</th>
+			<th>
+				Category
+			</th>
+			<th>
+				Price
+			</th>
+		</tr>
+		<tr *ngFor="let product of products">
+			<td>
+				{{product.name}}
+			</td>
+			<td>
+				{{product.category}}
+			</td>
+			<td>
+				{{product.price}}
+			</td>
+			<td>
+				<!--Navigate using the component event handler.-->
+				<!--<button class="btn btn-primary mce-btn-small" (click)="selectProduct(product.productId)">Details</button>-->
+
+				<!--Navigate using [routerLink]-->
+				<button class="btn btn-primary mce-btn-small" [routerLink]="['/detail', product.productId]">Details</button>
+			</td>
+		</tr>
+	</tbody>
+</table>

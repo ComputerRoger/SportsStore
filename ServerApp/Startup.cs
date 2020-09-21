@@ -67,16 +67,21 @@ namespace ServerApp
 			}
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
-
 			app.UseRouting();
-
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute(
 					name: "default",
-					pattern: "{controller=Home}/{action=Index}/{id?}");
+					pattern: "{controller=Home}/{action=Index}/{id?}" );
+
+				//	Allowing direct navigation during development.
+				//	Note:  if spaces are within regex(), then the pattern does NOT match.
+				endpoints.MapControllerRoute(
+					name: "angular_fallback",
+					pattern: "{target:regex(table|detail)}/{*catchall}",
+					defaults: new { controller = "Home", action = "Index" } );
 			});
 
 			app.UseSwagger();
