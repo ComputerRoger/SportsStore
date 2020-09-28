@@ -3,10 +3,19 @@ import { HttpClient } from "@Angular/common/http";
 
 import { Product } from './product.model';
 import { Supplier } from './supplier.model';
-import { Filter } from './configClasses.repository';
+import { Filter, Pagination } from './configClasses.repository';
+import { Observable } from "rxjs";
 
 const productsUrl = "/api/productvalues";
 const suppliersUrl = "/api/suppliervalues";
+const sessionUrl = "/api/session";
+
+//	The client and server keys of this type must match.
+type ProductsMetadata =
+	{
+		products: Product[],
+		categories: string[];
+	}
 
 //	REPORTING:			HTTP verb API	>>	Repository properties	>>	Component properties	>>	Template controls
 //	PERSISTING:			Template events	>>	Component handlers	>>	Repository methods	>>	HTTP verb API
@@ -19,6 +28,8 @@ export class Repository
 	supplierData: Supplier;
 	suppliers: Supplier[] = [];
 	filter: Filter = new Filter();
+	categories: string[] = [];
+	pagination = new Pagination();
 
 	constructor(private httpClient: HttpClient)
 	{
@@ -26,9 +37,12 @@ export class Repository
 		//this.filter.category = "soccer";
 		this.filter.related = true;
 
+		//	Angular emits a routing event when the application first starts,
+		//	which means that the HTTP request of the repository constructor can be removed.
+
 		//	Get all the products.
 		// this.getProducts(true);
-		this.getProducts();
+		//this.getProducts();
 
 		//	During development, only retrieve a single product.
 		// this.getProduct(2);
@@ -45,6 +59,22 @@ export class Repository
 		//  name: "The Product Name",
 		//  description: "The Product Description"
 		//}
+	}
+
+	//////////////////////		Session Methods			////////////////////////
+
+	storeSessionData<T>(dataType: string, data: T)
+	{
+		let endPoint = `${sessionUrl}/${dataType}`;
+		return this.httpClient.post(endPoint, data)
+			.subscribe(foo => { });
+	}
+
+	getSessionData<T>(dataType: string): Observable<T>
+	{
+		let endPoint = `${sessionUrl}/${dataType}`;
+		let data = this.httpClient.get<T>(endPoint);
+		return data;
 	}
 
 	//////////////////////		Read = HTTP GET			////////////////////////
@@ -71,8 +101,17 @@ export class Repository
 			endPoint += `&search=${this.filter.search}`;
 		}
 
-		this.httpClient.get<Product[]>(endPoint)
-			.subscribe(products => this.products = products);
+		//	Include categories as auxillary data.
+		endPoint += "&isMetadata=true";
+		//endPoint += "&isMetadata=false";
+
+		//	Get the composite data.
+		this.httpClient.get<ProductsMetadata>(endPoint)
+			.subscribe(productsMetadata =>
+			{
+				this.products = productsMetadata.products;
+				this.categories = productsMetadata.categories;
+			});
 		return this.products;
 	}
 
@@ -190,7 +229,8 @@ export class Repository
 
 	///////////////		Update = HTTP PATCH		//////////////////////
 
-	updateProduct( id: number, changes: Map<string, any>) {
+	updateProduct(id: number, changes: Map<string, any>)
+	{
 
 		//	Initialize the api buffer.
 		let patch = [];
@@ -204,23 +244,26 @@ export class Repository
 
 		//	Send the patch and update the repository.
 		this.httpClient.patch(`${productsUrl}/${id}`, patch)
-			.subscribe( () => this.getProducts() );
+			.subscribe(() => this.getProducts());
 	}
 
 	///////////////		Delete = HTTP DELETE		//////////////////////
 
-	deleteProduct(id: number) {
+	deleteProduct(id: number)
+	{
 
 		//	Send the patch and update the repository.
 		this.httpClient.delete(`${productsUrl}/${id}`)
 			.subscribe(() => this.getProducts());
 	}
 
-	deleteSupplier(id: number) {
+	deleteSupplier(id: number)
+	{
 
 		//	Send the patch and update the repository.
 		this.httpClient.delete(`${suppliersUrl}/${id}`)
-			.subscribe(() => {
+			.subscribe(() =>
+			{
 				this.getProducts();
 				this.getSuppliers()
 			});

@@ -34,22 +34,39 @@ namespace ServerApp
 			//services.AddControllersWithViews();
 			//	Add additional instructions to tell the JSON serializer to omit properties that are null.
 			services.AddControllersWithViews()
-				.AddJsonOptions( option =>
-				{
-					option.JsonSerializerOptions.IgnoreNullValues = true;
-				} ).AddNewtonsoftJson();
+				.AddJsonOptions(option =>
+			   {
+				   option.JsonSerializerOptions.IgnoreNullValues = true;
+			   }).AddNewtonsoftJson();
 
 			services.AddRazorPages();
 
 			//	Provide a description of the web service.
 			services.AddSwaggerGen(options =>
-			{
-				options.SwaggerDoc("v1", new OpenApiInfo
-				{
-					Title = "Sports Store API",
-					Version = "v1"
-				});
-			});
+		   {
+			   options.SwaggerDoc("v1", new OpenApiInfo
+			   {
+				   Title = "Sports Store API",
+				   Version = "v1"
+			   });
+		   });
+
+			//	Tell framework to use SQL Server as a data cache and provide the full location of the table.
+			services.AddDistributedSqlServerCache(options =>
+		   {
+			   options.ConnectionString = connectionString;
+			   options.SchemaName = "dbo";
+			   options.TableName = "SessionData";
+		   });
+
+			//	Provide the session state and configure the cookie to be used to identify sessions.
+			services.AddSession(options =>
+		   {
+			   options.Cookie.Name = "SportsStore.Session";
+			   options.IdleTimeout = System.TimeSpan.FromHours(48);
+			   options.Cookie.HttpOnly = false;
+			   options.Cookie.IsEssential = true;
+		   });
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,49 +84,54 @@ namespace ServerApp
 			}
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
+
+			//	Enable sessions in the application.
+			app.UseSession();
+
 			app.UseRouting();
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllerRoute(
-					name: "default",
-					pattern: "{controller=Home}/{action=Index}/{id?}" );
+		   {
+			   endpoints.MapControllerRoute(
+				   name: "default",
+				   pattern: "{controller=Home}/{action=Index}/{id?}");
 
 				//	Allowing direct navigation during development.
 				//	Note:  if spaces are within regex(), then the pattern does NOT match.
 				endpoints.MapControllerRoute(
-					name: "angular_fallback",
-					pattern: "{target:regex(table|detail)}/{*catchall}",
-					defaults: new { controller = "Home", action = "Index" } );
-			});
+				   name: "angular_fallback",
+				   //pattern: "{target:regex(table|detail)}/{*catchall}",
+				   pattern: "{target:regex(store|cart)}/{*catchall}",
+				   defaults: new { controller = "Home", action = "Index" });
+		   });
 
 			app.UseSwagger();
 			app.UseSwaggerUI(options =>
-			{
-				options.SwaggerEndpoint("/swagger/v1/swagger.json", "SportsStore API");
-			});
+		   {
+			   options.SwaggerEndpoint("/swagger/v1/swagger.json", "SportsStore API");
+		   });
 
 			app.UseSpa(spa =>
-			{
-				string strategy = Configuration.GetValue<string>("DevTools:ConnectionStrategy");
+		   {
+			   string strategy = Configuration.GetValue<string>("DevTools:ConnectionStrategy");
 
-				if (strategy == "proxy")
-				{
-					Uri angularServerUri = new Uri("http://127.0.0.1:4200");
-					spa.UseProxyToSpaDevelopmentServer(angularServerUri);
-				}
-				else if (strategy == "managed")
-				{
-					spa.Options.SourcePath = "../ClientApp";
+			   if (strategy == "proxy")
+			   {
+				   Uri angularServerUri = new Uri("http://127.0.0.1:4200");
+				   spa.UseProxyToSpaDevelopmentServer(angularServerUri);
+			   }
+			   else if (strategy == "managed")
+			   {
+				   spa.Options.SourcePath = "../ClientApp";
 
-					spa.UseAngularCliServer(npmScript: "start");
-				}
-				else
-				{
+				   spa.UseAngularCliServer(npmScript: "start");
+			   }
+			   else
+			   {
 					//  Do nothing.
 				}
-			});
+		   });
 
 			//  Seed the database with initial data if it is empty.
 			DataContext dataContext;

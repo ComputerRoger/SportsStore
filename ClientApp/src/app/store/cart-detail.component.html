@@ -1,0 +1,80 @@
+<div class="bg-dark text-white p-2">
+	<div class="navbar-brand">
+		SPORTS STORE
+	</div>
+</div>
+<div class="m-1">
+	<h2 class="text-center">
+		Your Cart
+	</h2>
+	<table class="table table-bordered table-striped p-1">
+		<thead>
+			<tr>
+				<th>
+					Quantity
+				</th>
+				<th class="text-right">
+					Product
+				</th>
+				<th class="text-right">
+					Price
+				</th>
+				<th class="text-right">
+					Subtotal
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngIf="cartService.productSelections.length==0">
+				<td colspan="4" class="text-xs-center">
+					Your cart is empty.
+				</td>
+			</tr>
+			<tr *ngFor="let productSelection of cartService.productSelections">
+				<td>
+					<!-- <input type="number" min="0" class="form-control-sm" style="width:5em"
+						[(ngModel)]="productSelection.m_quantity" (change)="productSelection.quantity<0 ?
+						productSelection.quantity=0 :productSelection.quantity;
+						productSelection.quantity>9 ? productSelection.quantity = 0 :productSelection.quantity" /> -->
+					<!-- <input type="number" class="form-control-sm" style="width:5em"
+						[(ngModel)]="productSelection.quantity" /> -->
+					<!-- <input type="number" class="form-control-sm" style="width:5em" [(ngModel)]="productSelection.quantity" /> -->
+					<!-- <input [value]="username" (input)="username = $event.target.value"> -->
+					<input type="number" class="form-control-sm" style="width:5em"
+						[(ngModel)]="productSelection.quantity" />
+				</td>
+				<td>
+					{{productSelection.name}}
+				</td>
+				<td class="text-right">
+					{{productSelection.price | currency:"USD":"symbol":"2.2-2"}}
+				</td>
+				<td class="text-right">
+					{{ productSelection.quantity * productSelection.price | currency:"USD":"symbol":"2.2-2"}}
+				</td>
+				<td class="text-center">
+					<button class="btn btn-sm btn-danger"
+						(click)="cartService.updateQuantity( productSelection.productId, 0 )">
+						Remove
+					</button>
+				</td>
+			</tr>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="3" class="text-right">Total:</td>
+				<td class="text-right">
+					{{cartService.totalPrice | currency:"USD":"symbol":"2.2-2"}}
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+<div class="text-center">
+	<button class="btn btn-primary m-1" routerLink="/store">
+		Continue
+	</button>
+	<button class="btn btn-secondary m-1" routerLink="/checkout" [disabled]="cartService.productSelections.length == 0">
+		Checkout
+	</button>
+</div>

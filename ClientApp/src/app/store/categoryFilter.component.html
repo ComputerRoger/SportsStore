@@ -1,0 +1,16 @@
+<h4 class="border border-dark bg-primary p-2">
+	Placeholder: Category Filter
+</h4>
+<div class="m-1">
+	<button class="btn btn-outline-primary btn-block"
+		[class.active]="navigationService.currentCategory == ''"
+		(click)="navigationService.currentCategory = ''">
+		All Categories
+	</button>
+	<button *ngFor="let category of navigationService.categories"
+		class="btn btn-outline-primary btn-block" 
+		[class.active]="navigationService.currentCategory.toLowerCase() == category.toLowerCase()"
+		(click)="navigationService.currentCategory = category">
+		{{category}}
+	</button>
+</div>
