@@ -23,13 +23,15 @@ export class CartService
 				{
 					cartData.forEach(item =>
 					{
-						//	Transform the data structure into the full instance with methods.
+						//	Transform the data structure into a full instance with methods.
 						let ps = new ProductSelection(this,
 							item.productId,
 							item.name,
 							item.price,
 							item.quantity);
 						//	Push the instance into the collection.
+						//	Two-way binding will now work because properties and methods exist.
+						//	Pushing the bare structure fails to provide methods and properties.
 						this.productSelections.push(ps);
 					});
 

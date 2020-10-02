@@ -26,6 +26,8 @@ namespace ServerApp.Models
         public DbSet<Product> Products{ get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Rating> Ratings { get; set; }
+		public DbSet<Order> Orders { get; set; }
+
 
 		//	OnModelCreating is used to override the conventions used to create a database schema.
 		protected override void OnModelCreating( ModelBuilder modelBuilder )

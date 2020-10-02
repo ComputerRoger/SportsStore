@@ -97,13 +97,13 @@ namespace ServerApp
 				   name: "default",
 				   pattern: "{controller=Home}/{action=Index}/{id?}");
 
-				//	Allowing direct navigation during development.
-				//	Note:  if spaces are within regex(), then the pattern does NOT match.
-				endpoints.MapControllerRoute(
-				   name: "angular_fallback",
-				   //pattern: "{target:regex(table|detail)}/{*catchall}",
-				   pattern: "{target:regex(store|cart)}/{*catchall}",
-				   defaults: new { controller = "Home", action = "Index" });
+			   //	Allowing direct navigation during development.
+			   //	Note:  if spaces are within regex(), then the pattern does NOT match.
+			   endpoints.MapControllerRoute(
+				  name: "angular_fallback",
+				  //pattern: "{target:regex(table|detail)}/{*catchall}",
+				  pattern: "{target:regex(store|cart|checkout)}/{*catchall}",
+				  defaults: new { controller = "Home", action = "Index" });
 		   });
 
 			app.UseSwagger();
@@ -129,8 +129,8 @@ namespace ServerApp
 			   }
 			   else
 			   {
-					//  Do nothing.
-				}
+				   //  Do nothing.
+			   }
 		   });
 
 			//  Seed the database with initial data if it is empty.

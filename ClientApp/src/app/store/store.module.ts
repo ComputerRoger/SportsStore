@@ -11,6 +11,11 @@ import { RatingsComponent } from './ratings.component';
 import { ProductSelectionComponent } from './productSelection.component';
 import { CartDetailComponent } from './cart-detail.component';
 
+import { CheckoutDetailsComponent } from './checkout/checkoutDetails.component';
+import { CheckoutPaymentComponent } from './checkout/checkoutPayment.component';
+import { CheckoutSummaryComponent } from './checkout/checkoutSummary.component';
+import { OrderConfirmationComponent } from './checkout/orderConfirmation.component';
+
 @NgModule({
 	declarations: [
 		CartSummaryComponent,
@@ -19,7 +24,11 @@ import { CartDetailComponent } from './cart-detail.component';
 		ProductListComponent,
 		RatingsComponent,
 		ProductSelectionComponent,
-		CartDetailComponent
+		CartDetailComponent,
+		CheckoutDetailsComponent,
+		CheckoutPaymentComponent,
+		CheckoutSummaryComponent,
+		OrderConfirmationComponent
 	],
 	imports: [
 		BrowserModule,

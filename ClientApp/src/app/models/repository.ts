@@ -5,10 +5,12 @@ import { Product } from './product.model';
 import { Supplier } from './supplier.model';
 import { Filter, Pagination } from './configClasses.repository';
 import { Observable } from "rxjs";
+import { Order, OrderConfirmation } from "./order.model";
 
 const productsUrl = "/api/productvalues";
 const suppliersUrl = "/api/suppliervalues";
 const sessionUrl = "/api/session";
+const ordersUrl = "/api/orders";
 
 //	The client and server keys of this type must match.
 type ProductsMetadata =
@@ -30,6 +32,7 @@ export class Repository
 	filter: Filter = new Filter();
 	categories: string[] = [];
 	pagination = new Pagination();
+	orders: Order[] = [];
 
 	constructor(private httpClient: HttpClient)
 	{
@@ -43,22 +46,6 @@ export class Repository
 		//	Get all the products.
 		// this.getProducts(true);
 		//this.getProducts();
-
-		//	During development, only retrieve a single product.
-		// this.getProduct(2);
-		//this.product = JSON.parse(document.getElementById("data").textContent);
-
-		//  Test JSON.parse.
-		//this.product = JSON.parse('{"productId":1,"name":"Kayak","category":"Watersports","description":"A boat for one persion","price":275.00,"supplier":null,"ratings":null}')
-
-		//  Test product construction.
-		//this.product = {
-		//  productId: 0,
-		//  price: 3.14,
-		//  category: "The Category",
-		//  name: "The Product Name",
-		//  description: "The Product Description"
-		//}
 	}
 
 	//////////////////////		Session Methods			////////////////////////
@@ -76,6 +63,40 @@ export class Repository
 		let data = this.httpClient.get<T>(endPoint);
 		return data;
 	}
+
+	///////////////////////		Orders 					////////////////////////
+
+	getOrders()
+	{
+		this.httpClient.get<Order[]>(ordersUrl)
+			.subscribe(data => this.orders = data);
+	}
+
+	createOrder(order: Order)
+	{
+		this.httpClient.post<OrderConfirmation>(ordersUrl,
+			{
+				name: order.name,
+				address: order.address,
+				payment: order.payment,
+				products: order.products
+			}).subscribe(data =>
+			{
+				//	Get the observable result.
+				order.orderConfirmation = data;
+
+				//	Clear the cart.
+				order.cartService.clear();
+				order.clear();
+			});
+	}
+
+	shipOrder(order: Order)
+	{
+		this.httpClient.post(`${ordersUrl}/${order.orderId}`,
+			{}).subscribe(() => this.getOrders());
+	}
+
 
 	//////////////////////		Read = HTTP GET			////////////////////////
 
