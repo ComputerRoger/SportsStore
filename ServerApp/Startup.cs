@@ -99,10 +99,14 @@ namespace ServerApp
 
 			   //	Allowing direct navigation during development.
 			   //	Note:  if spaces are within regex(), then the pattern does NOT match.
+
+			   //	Note:  "nonfile" is required because the name of the file that will be requested
+			   //			when the dynamic module loaded is admin-admin-module.js
+			   //			and CARE MUST BE TAKEN not to direct request for this file to MVC.
 			   endpoints.MapControllerRoute(
 				  name: "angular_fallback",
 				  //pattern: "{target:regex(table|detail)}/{*catchall}",
-				  pattern: "{target:regex(store|cart|checkout)}/{*catchall}",
+				  pattern: "{target:regex(admin|store|cart|checkout):nonfile}/{*catchall}",
 				  defaults: new { controller = "Home", action = "Index" });
 		   });
 
