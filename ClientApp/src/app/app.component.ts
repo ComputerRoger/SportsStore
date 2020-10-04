@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Repository } from "./models/repository";
 import { Product } from "./models/product.model";
 import { Supplier } from "./models/supplier.model";
+import { ErrorHandlerService } from "./errorHandler.service";
 
 @Component({
 	selector: 'app-root',
@@ -11,11 +12,21 @@ import { Supplier } from "./models/supplier.model";
 export class AppComponent
 {
 	title = 'SportsStore';
+	private lastError: string[];
 
 	//Inject the model container.
-	constructor(private repository: Repository) { }
+	constructor(private repository: Repository, errorService: ErrorHandlerService) {
+		errorService.errors.subscribe(error => {
+			this.lastError = error;
+		})
+	}
 
 	//////////////////////////	  Properties.		////////////////////
+
+	get error(): string[] {
+		return this.lastError;
+	}
+
 	get product(): Product
 	{
 		return this.repository.productData;
@@ -23,6 +34,12 @@ export class AppComponent
 	get products(): Product[]
 	{
 		return this.repository.products;
+	}
+
+	//////////////////////////	  Event handlers.		////////////////////
+
+	clearError() {
+		this.lastError = null;
 	}
 
 	///////////////////////////		Event handlers to initiate POSTs.		///////////////////

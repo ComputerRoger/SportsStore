@@ -102,7 +102,7 @@ namespace ServerApp
 
 			   //	Note:  "nonfile" is required because the name of the file that will be requested
 			   //			when the dynamic module loaded is admin-admin-module.js
-			   //			and CARE MUST BE TAKEN not to direct request for this file to MVC.
+			   //			and CARE MUST BE TAKEN not to direct requests for this file to MVC.
 			   endpoints.MapControllerRoute(
 				  name: "angular_fallback",
 				  //pattern: "{target:regex(table|detail)}/{*catchall}",

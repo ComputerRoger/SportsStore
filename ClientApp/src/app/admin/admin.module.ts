@@ -3,11 +3,13 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { FormsModule } from "@angular/forms";
+import { CommonModule } from "@angular/common";
 import { Repository } from "../models/repository";
 import { ProductAdminComponent } from './productAdmin.component';
 import { OrderAdminComponent } from './orderAdmin.component';
 import { OverviewComponent } from './overview.component';
 import { AdminComponent } from './admin.component';
+import { ProductEditorComponent } from './productEditor.component';
 
 const routes: Routes = [
 	{
@@ -35,7 +37,8 @@ const routes: Routes = [
 	imports: [
 		RouterModule,
 		FormsModule,
-		RouterModule.forChild(routes)
+		RouterModule.forChild(routes),
+		CommonModule
 	],
 	providers: [
 		Repository
@@ -44,7 +47,8 @@ const routes: Routes = [
 		AdminComponent,
 		OverviewComponent,
 		ProductAdminComponent,
-		OrderAdminComponent
+		OrderAdminComponent,
+		ProductEditorComponent
 	]
 })
 export class AdminModule { }

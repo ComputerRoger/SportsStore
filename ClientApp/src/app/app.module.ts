@@ -10,6 +10,8 @@ import { StoreModule } from './store/store.module';
 
 import { AppComponent } from './app.component';
 
+import { HTTP_INTERCEPTORS } from "@angular/common/http";
+import { ErrorHandlerService } from "./errorHandler.service";
 
 
 @NgModule({
@@ -23,7 +25,14 @@ import { AppComponent } from './app.component';
 		ModelModule,
 		StoreModule
 	],
-	providers: [],
+	providers: [
+		ErrorHandlerService,
+		{
+			provide: HTTP_INTERCEPTORS,
+			useExisting: ErrorHandlerService,
+			multi: true
+		}
+	],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
