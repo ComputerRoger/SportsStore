@@ -1,6 +1,11 @@
 <div>
 	<a class="navbar bg-info mb-1">SPORTS STORE Admin</a>
 	This is Admin.Component
+	<div class="float-right navbar-text">
+		<button class="btn btn-sm btn-warning" (click)="authenticationService.logout()">
+			Log Out
+		</button>
+	</div>
 </div>
 
 <div class="col-3 fixed-bottom mb-1">

@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ServerApp.Models;
 using ServerApp.Models.BindingTargets;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace ServerApp.Controllers
 {
+	[Authorize(Roles ="Administrator")]		//	Restrict all actions that operate on Supplier to users who are Administrators.
 	[Route( "api/suppliervalues" )]
 	[ApiController]
 	public class SupplierValuesController : ControllerBase

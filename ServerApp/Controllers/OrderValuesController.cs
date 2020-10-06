@@ -3,15 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using ServerApp.Models;
 using System.Collections.Generic;
 using System.Linq;
-// using System;
-// using System.Threading.Tasks;
-// using System.Threading;
-// using Microsoft.Extensions.Logging.Abstractions;
-// using ServerApp.Models.BindingTargets;
-// using Microsoft.AspNetCore.JsonPatch;
-// using System.Text.Json;
-// using System.Reflection;
-// using System.ComponentModel;
+using Microsoft.AspNetCore.Authorization;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -56,6 +49,7 @@ namespace ServerApp.Controllers
 			}
 		}
 
+		[AllowAnonymous]		//	All access by any user.
 		[HttpPost]
 		public IActionResult CreateOrder([FromBody] Order order)
 		{

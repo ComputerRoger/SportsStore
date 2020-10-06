@@ -11,6 +11,7 @@ const productsUrl = "/api/productvalues";
 const suppliersUrl = "/api/suppliervalues";
 const sessionUrl = "/api/session";
 const ordersUrl = "/api/orders";
+const accountUrl = "/api/account";
 
 //	The client and server keys of this type must match.
 type ProductsMetadata =
@@ -46,6 +47,24 @@ export class Repository
 		//	Get all the products.
 		// this.getProducts(true);
 		//this.getProducts();
+	}
+
+	//////////////////////		Authentication Methods			////////////////////////
+
+	login(name: string, password: string): Observable<boolean>
+	{
+		let actionPath = accountUrl + "/login";
+		return this.httpClient.post<boolean>(actionPath,
+			{
+				name: name,
+				password: password
+			});
+	}
+
+	logout()
+	{
+		let actionPath = accountUrl + "/logout";
+		this.httpClient.post(actionPath, null).subscribe(() => { });
 	}
 
 	//////////////////////		Session Methods			////////////////////////

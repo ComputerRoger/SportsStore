@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using ServerApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace ServerApp
 {
@@ -30,6 +31,15 @@ namespace ServerApp
 			//  Ensure that seed data is applied when ASP.Net Core starts.
 			string connectionString = Configuration["ConnectionStrings:DefaultConnection"];
 			services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+
+			//	Register the Identity database context with Entity Framework Core.
+			services.AddDbContext<IdentityDataContext>( options =>
+			{
+				options.UseSqlServer( Configuration[ "ConnectionStrings:Identity" ] );
+			} );
+
+			//	Tell Identity to use the default classes to represent users and roles.
+			services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityDataContext>();
 
 			//services.AddControllersWithViews();
 			//	Add additional instructions to tell the JSON serializer to omit properties that are null.
@@ -89,6 +99,7 @@ namespace ServerApp
 			app.UseSession();
 
 			app.UseRouting();
+			app.UseAuthentication();
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
@@ -141,6 +152,10 @@ namespace ServerApp
 			DataContext dataContext;
 			dataContext = serviceProvider.GetRequiredService<DataContext>();
 			SeedData.SeedDatabase(dataContext);
+
+			//	Seed the identity database.
+			//	Wait() ensures that the database context remains available while the database is seeded.
+			IdentitySeedData.SeedDatabase( serviceProvider ).Wait();
 		}
 	}
 }

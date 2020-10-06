@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using System.Text.Json;
 using System.Reflection;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,6 +23,7 @@ namespace ServerApp.Controllers
 	//[Route("api/[controller]")]
 	//  Match requests to api/products, not api/productValues.
 	[Route("api/productvalues")]
+	[Authorize( Roles = "Administrator" )]      //	Restrict all actions that operate on Supplier to users who are Administrators.
 	[ApiController]
 	public class ProductValuesController : ControllerBase
 	{
@@ -39,8 +41,8 @@ namespace ServerApp.Controllers
 		{
 		}
 
-		// GET api/<ProductValuesController>/5
-		[HttpGet("{id}")]
+		[AllowAnonymous]        //	All access by any user.
+		[HttpGet("{id}")]		// GET api/<ProductValuesController>/5
 		public Product Get(int id)
 		{
 			Product product;
@@ -100,8 +102,8 @@ namespace ServerApp.Controllers
 			return (product);
 		}
 
-		// GET: api/<ProductValuesController>
-		[HttpGet]
+		[AllowAnonymous]        //	All access by any user.
+		[HttpGet]				// GET: api/<ProductValuesController>
 		public IActionResult GetProducts(string category, string search,
 			bool isRelatedRequired = false, bool isMetadata = false)
 		{
@@ -134,8 +136,9 @@ namespace ServerApp.Controllers
 				   p.Description.ToLower().Contains(searchLc));
 			}
 
-
-			if (isRelatedRequired)
+			//	Only Administrators may see suppliers of products.
+			if (isRelatedRequired
+				&& HttpContext.User.IsInRole( "Administrator" ) )
 			{
 				//	Join the product suppliers and join the product ratings.
 				query = query.Include(p => p.Supplier).Include(p => p.Ratings);
