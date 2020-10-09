@@ -3,18 +3,16 @@ import { Observable } from "rxjs";
 import { Repository } from "../models/repository";
 
 @Injectable()
-export class SignalRConnectionService
+export class TextObservableService
 {
-	readonly chatHubKey = "/chat";
 	messageCounter;
 
-	/////////////////	Properties		//////////////////////
-
-
-	constructor(private repository: Repository)
+	constructor()
 	{
 		this.messageCounter = 0;
 	}
+
+	/////////////////	Properties		//////////////////////
 
 
 	/////////////////	Methods		//////////////////////

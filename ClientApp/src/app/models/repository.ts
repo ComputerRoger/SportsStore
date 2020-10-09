@@ -1,30 +1,18 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@Angular/common/http";
-import { SignalRConnectionService } from "../websockets/signalRConnection.service";
 
 import { Product } from './product.model';
 import { Supplier } from './supplier.model';
 import { Filter, Pagination } from './configClasses.repository';
 import { Observable } from "rxjs";
 import { Order, OrderConfirmation } from "./order.model";
-
-//	npm install @aspnet/signalr --save --force
-
-//import * as signalR from '@aspnet/signalr';
-import { HubConnectionBuilder, LogLevel, HubConnection, HubConnectionState } from '@aspnet/signalr';
+import { SignalRService } from "./signalR.service";
 
 const productsUrl = "/api/productvalues";
 const suppliersUrl = "/api/suppliervalues";
 const sessionUrl = "/api/session";
 const ordersUrl = "/api/orders";
 const accountUrl = "/api/account";
-
-//	The following must match Startup.cs - Configure().
-//	endpoints.MapHub<ChatHub>("/chat");
-const signalRHubUrl = "/chat";
-
-const signalRHubMethodName = "SendMessage";
-const signalRClientMethodName = "newMessage";
 
 //	The client and server keys of this type must match.
 type ProductsMetadata =
@@ -46,66 +34,11 @@ export class Repository {
 	categories: string[] = [];
 	pagination = new Pagination();
 	orders: Order[] = [];
-	hubConnection: HubConnection;
 
-	constructor(private httpClient: HttpClient) {
+	constructor(private httpClient: HttpClient, private signalRService: SignalRService) {
 		//	Set the filters.
 		//this.filter.category = "soccer";
 		this.filter.related = true;
-
-		//	Angular emits a routing event when the application first starts,
-		//	which means that the HTTP request of the repository constructor can be removed.
-
-		//	Get all the products.
-		// this.getProducts(true);
-		//this.getProducts();
-		this.initializeSignalR();
-	}
-
-	initializeSignalR() {
-
-		//	Startup.cs in the server has this endpoint:
-		//	endpoints.MapHub<ChatHub>("/chat");
-
-		this.hubConnection = new HubConnectionBuilder()
-			.configureLogging(LogLevel.Information)
-			.withUrl(signalRHubUrl)
-			.build();
-
-		//	Start the hubConnection before using it.
-		this.hubConnection.start().then(() => {
-			//	Log the message received to the console.
-			console.log("The hub connection has started.");
-			this.hubConnection.on(signalRClientMethodName, (sender, messageText) => {
-				console.log();
-				console.log("Success!  Message received from the hub! " + `${sender}:${messageText}`);
-				console.log();
-			});
-		});
-
-		console.log("End of ngOnInit().");
-	}
-
-	public broadcastMessage(message: string) {
-		if (this.hubConnection) {
-			console.log("signalR hubConnection is defined.");
-			if (this.hubConnection.state == HubConnectionState.Connected) {
-				console.log("signalR hubConnection is Connected.");
-
-				this.hubConnection.invoke(signalRHubMethodName, "This is an invoked message via hub method: " + signalRHubMethodName);
-				console.log("done broadcasting: " + message);
-				this.hubConnection.send(signalRHubMethodName, "Using send() with " + signalRHubMethodName);
-			}
-			else if (this.hubConnection.state == HubConnectionState.Disconnected) {
-				console.log("signalR hubConnection is Disconnected.");
-			}
-			else {
-				console.log("signalR hubConnection state is not known.");
-			}
-		}
-		else {
-			console.log("signalR hubConnection is null.");
-		}
 	}
 
 	//////////////////////		Authentication Methods			////////////////////////
@@ -179,7 +112,7 @@ export class Repository {
 
 	getProducts() {
 		console.log("Products Requested.");
-		this.broadcastMessage("A message broadcast during getProducts.");
+		this.signalRService.broadcastMessage("A message broadcast during getProducts.");
 
 		let endPoint = `${productsUrl}?isRelatedRequired=${this.filter.related}`;
 		if (this.filter.category) {

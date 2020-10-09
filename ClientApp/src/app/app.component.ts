@@ -4,7 +4,7 @@ import { Product } from "./models/product.model";
 import { Supplier } from "./models/supplier.model";
 import { ErrorHandlerService } from "./errorHandler.service";
 import { DateObservableService } from "./websockets/dateObservable.service";
-import { SignalRConnectionService } from "./websockets/signalRConnection.service";
+import { TextObservableService } from "./websockets/textObservable.service";
 import { Observable } from 'rxjs';
 
 //	npm install @aspnet/signalr --save --force
@@ -27,16 +27,17 @@ export class AppComponent implements OnInit
 	constructor(private repository: Repository,
 		errorService: ErrorHandlerService,
 		private dateObservableService: DateObservableService,
-		public signalRConnectionService: SignalRConnectionService)
+		public textObservableService: TextObservableService)
 	{
 		errorService.errors.subscribe(error =>
 		{
 			this.lastError = error;
 		});
 		this.dateObservable = dateObservableService.createObservableService();
-		this.textObservable = signalRConnectionService.createObservableService();
+		this.textObservable = textObservableService.createObservableService();
 	}
-	ngOnInit() {
+	ngOnInit()
+	{
 		console.log("AppComponent.  End of ngOnInit().");
 	}
 

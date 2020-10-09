@@ -13,9 +13,8 @@ import { AppComponent } from './app.component';
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { ErrorHandlerService } from "./errorHandler.service";
 
-import { WebSocketsService } from "./websockets/webSockets.service";
+import { TextObservableService } from "./websockets/textObservable.service";
 import { DateObservableService } from "./websockets/dateObservable.service";
-import { SignalRConnectionService } from "./websockets/signalRConnection.service";
 
 @NgModule({
 	declarations: [
@@ -35,9 +34,8 @@ import { SignalRConnectionService } from "./websockets/signalRConnection.service
 			useExisting: ErrorHandlerService,
 			multi: true
 		}
-		, WebSocketsService
+		, TextObservableService
 		, DateObservableService
-		, SignalRConnectionService
 	]
 	, bootstrap: [AppComponent]
 })
