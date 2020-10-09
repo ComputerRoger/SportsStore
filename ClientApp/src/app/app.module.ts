@@ -13,26 +13,32 @@ import { AppComponent } from './app.component';
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { ErrorHandlerService } from "./errorHandler.service";
 
+import { WebSocketsService } from "./websockets/webSockets.service";
+import { DateObservableService } from "./websockets/dateObservable.service";
+import { SignalRConnectionService } from "./websockets/signalRConnection.service";
 
 @NgModule({
 	declarations: [
 		AppComponent
-	],
-	imports: [
+	]
+	, imports: [
 		BrowserModule,
 		FormsModule,
 		AppRoutingModule,
 		ModelModule,
 		StoreModule
-	],
-	providers: [
-		ErrorHandlerService,
-		{
+	]
+	, providers: [
+		ErrorHandlerService
+		, {
 			provide: HTTP_INTERCEPTORS,
 			useExisting: ErrorHandlerService,
 			multi: true
 		}
-	],
-	bootstrap: [AppComponent]
+		, WebSocketsService
+		, DateObservableService
+		, SignalRConnectionService
+	]
+	, bootstrap: [AppComponent]
 })
 export class AppModule { }

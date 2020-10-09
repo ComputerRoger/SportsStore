@@ -1,29 +1,49 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Repository } from "./models/repository";
 import { Product } from "./models/product.model";
 import { Supplier } from "./models/supplier.model";
 import { ErrorHandlerService } from "./errorHandler.service";
+import { DateObservableService } from "./websockets/dateObservable.service";
+import { SignalRConnectionService } from "./websockets/signalRConnection.service";
+import { Observable } from 'rxjs';
+
+//	npm install @aspnet/signalr --save --force
+
+//import * as signalR from '@aspnet/signalr';
+import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.css']
 })
-export class AppComponent
+export class AppComponent implements OnInit
 {
 	title = 'SportsStore';
 	private lastError: string[];
+	public dateObservable: Observable<Date>;
+	public textObservable: Observable<string>;
 
-	//Inject the model container.
-	constructor(private repository: Repository, errorService: ErrorHandlerService) {
-		errorService.errors.subscribe(error => {
+	constructor(private repository: Repository,
+		errorService: ErrorHandlerService,
+		private dateObservableService: DateObservableService,
+		public signalRConnectionService: SignalRConnectionService)
+	{
+		errorService.errors.subscribe(error =>
+		{
 			this.lastError = error;
-		})
+		});
+		this.dateObservable = dateObservableService.createObservableService();
+		this.textObservable = signalRConnectionService.createObservableService();
+	}
+	ngOnInit() {
+		console.log("AppComponent.  End of ngOnInit().");
 	}
 
 	//////////////////////////	  Properties.		////////////////////
 
-	get error(): string[] {
+	get error(): string[]
+	{
 		return this.lastError;
 	}
 
@@ -38,7 +58,8 @@ export class AppComponent
 
 	//////////////////////////	  Event handlers.		////////////////////
 
-	clearError() {
+	clearError()
+	{
 		this.lastError = null;
 	}
 
@@ -90,7 +111,8 @@ export class AppComponent
 
 	///////////////////////////		Event handlers to initiate PATCHs.		///////////////////
 
-	updateProduct() {
+	updateProduct()
+	{
 		//	Test with a legitimate value.
 		let changes = new Map<string, any>();
 		changes.set("name", "Green Kayak");
@@ -100,12 +122,15 @@ export class AppComponent
 
 	///////////////////////////		Event handlers to initiate DELETEs.		///////////////////
 
-	deleteProduct() {
+	deleteProduct()
+	{
 		//	Test with a legitimate value.
 		this.repository.deleteProduct(1);
 	}
 
-	deleteSupplier() {
+	deleteSupplier()
+	{
 		//	Test with a legitimate value.
-		this.repository.deleteSupplier(2);	}
+		this.repository.deleteSupplier(2);
+	}
 }

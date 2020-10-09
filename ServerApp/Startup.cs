@@ -33,10 +33,10 @@ namespace ServerApp
 			services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
 
 			//	Register the Identity database context with Entity Framework Core.
-			services.AddDbContext<IdentityDataContext>( options =>
-			{
-				options.UseSqlServer( Configuration[ "ConnectionStrings:Identity" ] );
-			} );
+			services.AddDbContext<IdentityDataContext>(options =>
+		   {
+			   options.UseSqlServer(Configuration["ConnectionStrings:Identity"]);
+		   });
 
 			//	Tell Identity to use the default classes to represent users and roles.
 			services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityDataContext>();
@@ -50,6 +50,9 @@ namespace ServerApp
 			   }).AddNewtonsoftJson();
 
 			services.AddRazorPages();
+
+			//	For dependency injection, add the SignalR extension.
+			services.AddSignalR();
 
 			//	Provide a description of the web service.
 			services.AddSwaggerGen(options =>
@@ -119,7 +122,24 @@ namespace ServerApp
 				  //pattern: "{target:regex(table|detail)}/{*catchall}",
 				  pattern: "{target:regex(admin|store|cart|checkout):nonfile}/{*catchall}",
 				  defaults: new { controller = "Home", action = "Index" });
+
+			   //	This is the recommended place to use SignalR MapHub<>.
+			   //	TypeScript will use the relative path specified here.
+			   //	e.g. const signalRHubUrl = "/chat";
+			   //    this.hubConnection = new HubConnectionBuilder()
+			   // 		.configureLogging(LogLevel.Information)
+			   // 		.withUrl(signalRHubUrl)
+			   // 		.build();
+			   endpoints.MapHub<ChatHub>("/chat");
 		   });
+
+			//	Prepare WebSockets.
+			var webSocketOptions = new WebSocketOptions()
+			{
+				KeepAliveInterval = TimeSpan.FromSeconds(120),
+				ReceiveBufferSize = 4 * 1024
+			};
+			app.UseWebSockets(webSocketOptions);
 
 			app.UseSwagger();
 			app.UseSwaggerUI(options =>
@@ -155,7 +175,7 @@ namespace ServerApp
 
 			//	Seed the identity database.
 			//	Wait() ensures that the database context remains available while the database is seeded.
-			IdentitySeedData.SeedDatabase( serviceProvider ).Wait();
+			IdentitySeedData.SeedDatabase(serviceProvider).Wait();
 		}
 	}
 }

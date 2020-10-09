@@ -35,7 +35,7 @@ import { OrderConfirmationComponent } from './checkout/orderConfirmation.compone
 		FormsModule,
 		RouterModule
 	],
-	providers: [],
-	bootstrap: [ProductSelectionComponent]
+	providers: []
+	//,bootstrap: [ProductSelectionComponent]
 })
 export class StoreModule { }
