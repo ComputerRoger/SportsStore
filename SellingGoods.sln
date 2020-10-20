@@ -32,7 +32,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncSockets", "AsyncSocket
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebView2.WinForms", "WebView2.WinForms\WebView2.WinForms.csproj", "{5CECFA1A-348F-49A1-B50D-EDCD5000245E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserFormServer", "WindowsFormsApp1\BrowserFormServer.csproj", "{1CF9214A-A57C-43CC-81DD-C50EC265B170}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserFormServer", "BrowserFormServer\BrowserFormServer.csproj", "{1CF9214A-A57C-43CC-81DD-C50EC265B170}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
