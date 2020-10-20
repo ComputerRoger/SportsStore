@@ -25,4 +25,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AsyncSockets\AsyncSockets.csproj" />
+    <ProjectReference Include="..\GeneralClassLibrary\GeneralClassLibrary.csproj" />
+  </ItemGroup>
+
 </Project>
