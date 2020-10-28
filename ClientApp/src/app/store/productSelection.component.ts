@@ -18,4 +18,12 @@ export class ProductSelectionComponent
 
 	///////////////////////////		Event handlers.		///////////////////
 
+	TestMeGet()
+	{
+		this.repository.queryBrowserGet();
+	}
+	TestMePost()
+	{
+		this.repository.queryBrowserPost();
+	}
 }

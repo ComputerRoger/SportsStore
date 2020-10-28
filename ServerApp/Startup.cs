@@ -119,7 +119,6 @@ namespace ServerApp
 			   //			and CARE MUST BE TAKEN not to direct requests for this file to MVC.
 			   endpoints.MapControllerRoute(
 				  name: "angular_fallback",
-				  //pattern: "{target:regex(table|detail)}/{*catchall}",
 				  pattern: "{target:regex(admin|store|cart|checkout):nonfile}/{*catchall}",
 				  defaults: new { controller = "Home", action = "Index" });
 

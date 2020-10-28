@@ -8,11 +8,14 @@ import { Observable } from "rxjs";
 import { Order, OrderConfirmation } from "./order.model";
 import { SignalRService } from "./signalR.service";
 
-const productsUrl = "/api/productvalues";
-const suppliersUrl = "/api/suppliervalues";
-const sessionUrl = "/api/session";
-const ordersUrl = "/api/orders";
-const accountUrl = "/api/account";
+//	Define the MVC Route patterns associated with Controller prefixes.
+const productsUrl = "/api/productvalues";			//	ProductValuesController
+const suppliersUrl = "/api/suppliervalues";			//	SupplierValuesController
+const sessionUrl = "/api/session";					//	SessionValuesController
+const ordersUrl = "/api/orders";					//	OrderValuessController
+const accountUrl = "/api/account";					//	AccountController
+//const queryBrowserUrl = "/api/queryBrowser";		//	QueryBrowserController
+const queryBrowserUrl = "/api/queryBrowser";		//	QueryBrowserController
 
 //	The client and server keys of this type must match.
 type ProductsMetadata =
@@ -25,7 +28,8 @@ type ProductsMetadata =
 //	PERSISTING:			Template events	>>	Component handlers	>>	Repository methods	>>	HTTP verb API
 
 @Injectable()
-export class Repository {
+export class Repository
+{
 	productData: Product;
 	products: Product[];
 	supplierData: Supplier;
@@ -35,15 +39,28 @@ export class Repository {
 	pagination = new Pagination();
 	orders: Order[] = [];
 
-	constructor(private httpClient: HttpClient, private signalRService: SignalRService) {
+	constructor(private httpClient: HttpClient, private signalRService: SignalRService)
+	{
 		//	Set the filters.
 		//this.filter.category = "soccer";
 		this.filter.related = true;
 	}
 
+	queryBrowserGet()
+	{
+		let actionPath = queryBrowserUrl + "/Test";
+		this.httpClient.get<String>(actionPath).subscribe(() => { });
+	}
+
+	queryBrowserPost()
+	{
+		let actionPath = queryBrowserUrl + "/Test";
+		this.httpClient.post(actionPath, null).subscribe(() => { });
+	}
 	//////////////////////		Authentication Methods			////////////////////////
 
-	login(name: string, password: string): Observable<boolean> {
+	login(name: string, password: string): Observable<boolean>
+	{
 		let actionPath = accountUrl + "/login";
 		return this.httpClient.post<boolean>(actionPath,
 			{
@@ -52,20 +69,23 @@ export class Repository {
 			});
 	}
 
-	logout() {
+	logout()
+	{
 		let actionPath = accountUrl + "/logout";
 		this.httpClient.post(actionPath, null).subscribe(() => { });
 	}
 
 	//////////////////////		Session Methods			////////////////////////
 
-	storeSessionData<T>(dataType: string, data: T) {
+	storeSessionData<T>(dataType: string, data: T)
+	{
 		let endPoint = `${sessionUrl}/${dataType}`;
 		return this.httpClient.post(endPoint, data)
 			.subscribe(foo => { });
 	}
 
-	getSessionData<T>(dataType: string): Observable<T> {
+	getSessionData<T>(dataType: string): Observable<T>
+	{
 		let endPoint = `${sessionUrl}/${dataType}`;
 		let data = this.httpClient.get<T>(endPoint);
 		return data;
@@ -73,19 +93,22 @@ export class Repository {
 
 	///////////////////////		Orders 					////////////////////////
 
-	getOrders() {
+	getOrders()
+	{
 		this.httpClient.get<Order[]>(ordersUrl)
 			.subscribe(data => this.orders = data);
 	}
 
-	createOrder(order: Order) {
+	createOrder(order: Order)
+	{
 		this.httpClient.post<OrderConfirmation>(ordersUrl,
 			{
 				name: order.name,
 				address: order.address,
 				payment: order.payment,
 				products: order.products
-			}).subscribe(data => {
+			}).subscribe(data =>
+			{
 				//	Get the observable result.
 				order.orderConfirmation = data;
 
@@ -95,7 +118,8 @@ export class Repository {
 			});
 	}
 
-	shipOrder(order: Order) {
+	shipOrder(order: Order)
+	{
 		this.httpClient.post(`${ordersUrl}/${order.orderId}`,
 			{}).subscribe(() => this.getOrders());
 	}
@@ -104,21 +128,25 @@ export class Repository {
 	//////////////////////		Read = HTTP GET			////////////////////////
 
 	//  Get a product.
-	getProduct(idProduct: number) {
+	getProduct(idProduct: number)
+	{
 		let endPoint = `${productsUrl}/${idProduct}`;
 		this.httpClient.get<Product>(endPoint).subscribe(p => this.productData = p);
 		console.log("Product Data Received.");
 	}
 
-	getProducts() {
+	getProducts()
+	{
 		console.log("Products Requested.");
 		this.signalRService.broadcastMessage("A message broadcast during getProducts.");
 
 		let endPoint = `${productsUrl}?isRelatedRequired=${this.filter.related}`;
-		if (this.filter.category) {
+		if (this.filter.category)
+		{
 			endPoint += `&category=${this.filter.category}`;
 		}
-		if (this.filter.search) {
+		if (this.filter.search)
+		{
 			endPoint += `&search=${this.filter.search}`;
 		}
 
@@ -128,7 +156,8 @@ export class Repository {
 
 		//	Get the composite data.
 		this.httpClient.get<ProductsMetadata>(endPoint)
-			.subscribe(productsMetadata => {
+			.subscribe(productsMetadata =>
+			{
 				this.products = productsMetadata.products;
 				this.categories = productsMetadata.categories;
 			});
@@ -136,13 +165,15 @@ export class Repository {
 	}
 
 	//  Get a supplier.
-	getSupplier(idSupplier: number) {
+	getSupplier(idSupplier: number)
+	{
 		let endPoint = `${suppliersUrl}/${idSupplier}`;
 		this.httpClient.get<Supplier>(endPoint).subscribe(s => this.supplierData = s);
 		console.log("Supplier Data Received.");
 	}
 
-	getSuppliers() {
+	getSuppliers()
+	{
 		console.log("Suppliers Requested.");
 		let endPoint = `${suppliersUrl}`;
 
@@ -152,7 +183,8 @@ export class Repository {
 
 	///////////////		Create = HTTP POST		//////////////////////
 
-	createProduct(product: Product) {
+	createProduct(product: Product)
+	{
 		//	Initialize the api buffer.
 		let productData =
 		{
@@ -165,7 +197,8 @@ export class Repository {
 
 		//	Post the object.
 		this.httpClient.post<number>(productsUrl, productData)
-			.subscribe(id => {
+			.subscribe(id =>
+			{
 				//	The new primary key is returned.
 				product.productId = id;
 
@@ -175,7 +208,8 @@ export class Repository {
 			});
 	}
 
-	createProductAndSupplier(product: Product, supplier: Supplier) {
+	createProductAndSupplier(product: Product, supplier: Supplier)
+	{
 		//	Initialize the api buffer.
 		let supplierData =
 		{
@@ -186,11 +220,13 @@ export class Repository {
 
 		//	Post the foreign key object first.
 		this.httpClient.post<number>(suppliersUrl, supplierData)
-			.subscribe(id => {
+			.subscribe(id =>
+			{
 				supplier.supplierId = id;
 				product.supplier = supplier;
 				this.suppliers.push(supplier);
-				if (product != null) {
+				if (product != null)
+				{
 					//	Post the parent after posting the foreign key object.
 					this.createProduct(product);
 				}
@@ -199,7 +235,8 @@ export class Repository {
 
 	///////////////		Replace = HTTP PUT		//////////////////////
 
-	replaceProduct(product: Product) {
+	replaceProduct(product: Product)
+	{
 		//	Initialize the api buffer.
 		let productData =
 		{
@@ -212,13 +249,15 @@ export class Repository {
 
 		//	HTTP PUT the object with the id attached to the URL.
 		this.httpClient.put(productsUrl + `/${product.productId}`, productData)
-			.subscribe(() => {
+			.subscribe(() =>
+			{
 				//	Refresh the products property.
 				this.getProducts();
 			});
 	}
 
-	replaceSupplier(supplier: Supplier) {
+	replaceSupplier(supplier: Supplier)
+	{
 		//	Initialize the api buffer.
 		let supplierData =
 		{
@@ -229,7 +268,8 @@ export class Repository {
 
 		//	HTTP PUT the object with the id attached to the URL.
 		this.httpClient.put(suppliersUrl + `/${supplier.supplierId}`, supplierData)
-			.subscribe(() => {
+			.subscribe(() =>
+			{
 				//	Refresh the suppliers property.
 				//this.getSuppliers();
 				this.getProducts();
@@ -238,7 +278,8 @@ export class Repository {
 
 	///////////////		Update = HTTP PATCH		//////////////////////
 
-	updateProduct(id: number, changes: Map<string, any>) {
+	updateProduct(id: number, changes: Map<string, any>)
+	{
 
 		//	Initialize the api buffer.
 		let patch = [];
@@ -257,18 +298,21 @@ export class Repository {
 
 	///////////////		Delete = HTTP DELETE		//////////////////////
 
-	deleteProduct(id: number) {
+	deleteProduct(id: number)
+	{
 
 		//	Send the patch and update the repository.
 		this.httpClient.delete(`${productsUrl}/${id}`)
 			.subscribe(() => this.getProducts());
 	}
 
-	deleteSupplier(id: number) {
+	deleteSupplier(id: number)
+	{
 
 		//	Send the patch and update the repository.
 		this.httpClient.delete(`${suppliersUrl}/${id}`)
-			.subscribe(() => {
+			.subscribe(() =>
+			{
 				this.getProducts();
 				this.getSuppliers()
 			});

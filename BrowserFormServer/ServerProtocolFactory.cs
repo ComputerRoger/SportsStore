@@ -14,7 +14,10 @@ namespace BrowserFormServer
 	{
 		public IServerProtocol CreateServerProtocol( Socket clientSocket, ILogger logger )
 		{
-			return new BrowserServerProtocol( clientSocket, logger );
+			ServiceRequest serviceRequest;
+
+			serviceRequest = new ServiceRequest();
+			return new BrowserServerProtocol( clientSocket, logger, serviceRequest );
 		}
 	}
 }

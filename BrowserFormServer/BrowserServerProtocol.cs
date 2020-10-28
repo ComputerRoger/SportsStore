@@ -6,19 +6,30 @@ using System.Text;
 using System.Threading.Tasks;
 using GeneralClassLibrary;
 using AsyncSockets;
+using System.IO;
+using System.IO.Ports;
+using System.ComponentModel;
 
 namespace BrowserFormServer
 {
 	public class BrowserServerProtocol : IServerProtocol
 	{
-		public BrowserServerProtocol( Socket clientSocket, ILogger logger )
+		public BrowserServerProtocol( Socket clientSocket, ILogger logger, IServiceRequest serviceRequest )
 		{
 			ClientSocket = clientSocket;
 			Logger = logger;
+			TcpClient tcpClient = new TcpClient();
+			TcpClient = tcpClient;
+			TcpClient.Client = clientSocket;
+			SizeStreamBuffer = 65535;
+			ServiceRequest = serviceRequest;
 		}
 
 		public Socket ClientSocket { get; protected set; }
 		public ILogger Logger { get; protected set; }
+		public TcpClient TcpClient { get; protected set; }
+		public int SizeStreamBuffer { get; protected set; }
+		public IServiceRequest ServiceRequest { get; protected set; }
 
 		//	Do application specific work here.
 		//	It could be a looped protocol exchanging a series of instructions.
@@ -26,37 +37,44 @@ namespace BrowserFormServer
 		//	The client should close the socket.
 		//	However, in HTTP, it is the server that closes the connection.
 		//	That is why HTTP is a connectionless protocol.
-		public void HandleClientConnection()
+		public async void HandleClientConnection()
 		{
+			BufferedStream bufferedStream;
 			ILogger logger;
-			Socket clientSocket;
+			IServiceRequest serviceRequest;
+			TcpClient tcpClient;
 
-			clientSocket = ClientSocket;
+			tcpClient = TcpClient;
 			logger = Logger;
+			serviceRequest = ServiceRequest;
 
-			//	Get the input buffer.
-			AsyncReceive asyncReceive = new AsyncReceive( clientSocket, logger );
-			string receiveText = asyncReceive.Receive();
-			if( receiveText.Length > 0 )
-			{
-				logger.WriteEntry( receiveText );
-			}
+			string methodName = "HandleClientConnection";
 
-			//	Decode the received text into an application specific command.
+			logger.WriteEntry( methodName + " A connection has been made to the server." );
 
-			//	Depending on the application specific protocol,
-			//	Shutdown() can be used to close receive/send/both actions.
+			NetworkStream networkStream = tcpClient.GetStream();
+			bufferedStream = new BufferedStream( networkStream, SizeStreamBuffer );
+			await SendReceiveReply.ReceiveServiceReply( bufferedStream, serviceRequest, logger );
+			bufferedStream.Close();
+			logger.WriteEntry( methodName + " done" );
+		}
+	}
 
-			//	Bottom line is that business logic determines who closes a socket.
-			//	Do work here and build a response.
+	public class ServiceRequest : IServiceRequest
+	{
+		public async Task<RequestResponseFrame> DoSomeWork( ITcpFrame requestFrame )
+		{
+			await Task.Delay(10000);
+			RequestResponseFrame requestResponseFrame = new RequestResponseFrame( requestFrame.FramePacket );
+			return requestResponseFrame;
+		}
 
-			//	QNX maintained an open socket with send/receive/reply as the protocol.
-			//	In QNX, the client determines when a socket is closed, not the server.
+		public async Task<ITcpFrame> ServiceTheRequest( ITcpFrame requestFrame, ILogger logger )
+		{
+			ITcpFrame tcpFrame;
 
-			string sendText = "This is a message from the server.";
-
-			AsyncSend asyncSend = new AsyncSend( clientSocket, logger );
-			asyncSend.Send( sendText );
+			tcpFrame = await DoSomeWork( requestFrame );
+			return tcpFrame;
 		}
 	}
 
@@ -65,7 +83,10 @@ namespace BrowserFormServer
 		public BrowserServerProtocolFactory() { }
 		public IServerProtocol CreateServerProtocol( Socket clientSocket, ILogger logger )
 		{
-			IServerProtocol serverProtocol = new BrowserServerProtocol( clientSocket, logger );
+			ServiceRequest serviceRequest;
+
+			serviceRequest = new ServiceRequest();
+			IServerProtocol serverProtocol = new BrowserServerProtocol( clientSocket, logger, serviceRequest );
 			return ( serverProtocol );
 		}
 	}

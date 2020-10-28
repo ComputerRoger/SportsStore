@@ -50,6 +50,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="SendReceiveReply.cs" />
     <Compile Include="ServerProtocolFactory.cs" />
     <Compile Include="TcpServer.cs" />
     <Compile Include="ThreadDispatcher.cs" />

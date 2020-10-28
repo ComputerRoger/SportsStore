@@ -9,10 +9,10 @@ namespace AsyncSockets
 {
 	public class AsyncConnect
 	{
-		public AsyncConnect( string serverName, int serverPort, ILogger logger )
+		public AsyncConnect( string serverHostName, int serverPortNumber, ILogger logger )
 		{
-			ServerName = serverName;
-			ServerPort = serverPort;
+			ServerHostName = serverHostName;
+			ServerPortNumber = serverPortNumber;
 			Logger = logger;
 			ClientSocket = null;
 			ConnectDoneEvent = new ManualResetEvent( false );
@@ -22,13 +22,13 @@ namespace AsyncSockets
 
 		public ManualResetEvent ConnectDoneEvent { get; protected set; } = new ManualResetEvent( false );
 		public Socket ClientSocket { get; protected set; } = null;
-		public string ServerName { get; protected set; }
-		public int ServerPort { get; protected set; }
+		public string ServerHostName { get; protected set; }
+		public int ServerPortNumber { get; protected set; }
 		public ILogger Logger { get; protected set; }
 
 		#endregion
 
-		protected void Connect()
+		public void Connect()
 		{
 			Socket clientSocket;
 
@@ -36,9 +36,9 @@ namespace AsyncSockets
 			try
 			{
 				// Establish the remote endpoint for the socket.  
-				IPHostEntry ipHostInfo = Dns.GetHostEntry( ServerName );
+				IPHostEntry ipHostInfo = Dns.GetHostEntry( ServerHostName );
 				IPAddress ipAddress = ipHostInfo.AddressList[ 0 ];
-				IPEndPoint serverEndPoint = new IPEndPoint( ipAddress, ServerPort );
+				IPEndPoint serverEndPoint = new IPEndPoint( ipAddress, ServerPortNumber );
 
 				// Create a TCP/IP socket. 
 				clientSocket = new Socket( ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp );

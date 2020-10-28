@@ -22,23 +22,5 @@ namespace AsyncSockets.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("65000")]
-        public int SizeTcpByteArray {
-            get {
-                return ((int)(this["SizeTcpByteArray"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int SizeThreadPool {
-            get {
-                return ((int)(this["SizeThreadPool"]));
-            }
-        }
     }
 }

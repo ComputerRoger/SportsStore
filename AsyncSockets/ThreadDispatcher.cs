@@ -52,10 +52,6 @@ namespace AsyncSockets
 	{
 		private readonly int m_SizeThreadPool;
 
-		public PoolThreadDispatcher()
-		{
-			this.m_SizeThreadPool = Properties.Settings.Default.SizeThreadPool;
-		}
 		public PoolThreadDispatcher( int sizeThreadPool )
 		{
 			this.m_SizeThreadPool = sizeThreadPool;

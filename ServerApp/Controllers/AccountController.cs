@@ -14,8 +14,8 @@ namespace ServerApp.Controllers
 		private UserManager<IdentityUser> m_UserManager;
 		private SignInManager<IdentityUser> m_SignInManager;
 
-		public AccountController( UserManager<IdentityUser> userManager,
-			SignInManager<IdentityUser> signInManager )
+		public AccountController(UserManager<IdentityUser> userManager,
+			SignInManager<IdentityUser> signInManager)
 		{
 			m_UserManager = userManager;
 			m_SignInManager = signInManager;
@@ -25,13 +25,13 @@ namespace ServerApp.Controllers
 
 		//	Perform authentication.
 		//	Web service authentication will also use this method.
-		private async Task<bool> DoLogin( LoginViewModel loginViewModel )
+		private async Task<bool> DoLogin(LoginViewModel loginViewModel)
 		{
 			Microsoft.AspNetCore.Identity.SignInResult signInResult;
 			bool isDoLogin;
 
-			IdentityUser identityUser = await m_UserManager.FindByNameAsync( loginViewModel.Name );
-			if( identityUser == null )
+			IdentityUser identityUser = await m_UserManager.FindByNameAsync(loginViewModel.Name);
+			if (identityUser == null)
 			{
 				isDoLogin = false;
 			}
@@ -45,16 +45,16 @@ namespace ServerApp.Controllers
 
 				isLockoutOnFailure = false;
 				isPersistent = false;
-				signInResult = await m_SignInManager.PasswordSignInAsync( identityUser, loginViewModel.Password, isPersistent, isLockoutOnFailure );
+				signInResult = await m_SignInManager.PasswordSignInAsync(identityUser, loginViewModel.Password, isPersistent, isLockoutOnFailure);
 				isDoLogin = signInResult.Succeeded;
 			}
-			return ( isDoLogin );
+			return (isDoLogin);
 		}
 		#endregion
 
 		//	Render a Razor view that will prompt the user for their credentials.
 		[HttpGet]
-		public IActionResult Login( string returnUrl )
+		public IActionResult Login(string returnUrl)
 		{
 			ViewBag.returnUrl = returnUrl;
 			return View();
@@ -62,55 +62,62 @@ namespace ServerApp.Controllers
 
 		//	Validate the credentials and sign-in the user.
 		[HttpPost]
-		public async Task<IActionResult> Login( LoginViewModel loginViewModel,
-			string returnUrl )
+		public async Task<IActionResult> Login(LoginViewModel loginViewModel,
+			string returnUrl)
 		{
-			if( ModelState.IsValid )
+			if (ModelState.IsValid)
 			{
-				if( await DoLogin( loginViewModel ))
+				if (await DoLogin(loginViewModel))
 				{
-					return ( Redirect( returnUrl ?? "/" ) );
+					return (Redirect(returnUrl ?? "/"));
 				}
 				else
 				{
-					ModelState.AddModelError( "", "The username and/or password do not match an existing account." );
+					ModelState.AddModelError("", "The username and/or password do not match an existing account.");
 				}
 			}
-			return View ( loginViewModel );
+			return View(loginViewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Logout( string redirectUrl )
+		public async Task<IActionResult> Logout(string redirectUrl)
 		{
 			await m_SignInManager.SignOutAsync();
-			return Redirect( redirectUrl ?? "/" );
+			return Redirect(redirectUrl ?? "/");
 		}
 
-		[HttpPost( "/api/account/login" )]
+		[HttpPost("/api/account/test")]
+		public async Task<IActionResult> Test(string redirectUrl)
+		{
+			await m_SignInManager.SignOutAsync();
+			return Redirect(redirectUrl ?? "/");
+		}
+
+		[HttpPost("/api/account/login")]
 		public async Task<IActionResult> Login([FromBody] LoginViewModel loginViewModel)
 		{
 			IActionResult iActionResult;
 
-			if( ModelState.IsValid 
-				&& await DoLogin( loginViewModel ))
+			if (ModelState.IsValid
+				&& await DoLogin(loginViewModel))
 			{
-				iActionResult = Ok( "true" );
+				iActionResult = Ok("true");
 			}
 			else
 			{
 				iActionResult = BadRequest();
 			}
-			return ( iActionResult );
+			return (iActionResult);
 		}
 
-		[HttpPost( "/api/account/logout" )]
+		[HttpPost("/api/account/logout")]
 		public async Task<IActionResult> Logout()
 		{
 			IActionResult iActionResult;
 
 			await m_SignInManager.SignOutAsync();
 			iActionResult = Ok();
-			return ( iActionResult );
+			return (iActionResult);
 		}
 	}
 

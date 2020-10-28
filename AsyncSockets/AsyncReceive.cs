@@ -23,8 +23,8 @@ namespace AsyncSockets
 
 			public void InitializeAsyncReceiveState()
 			{
-				SizeTcpByteArray = Properties.Settings.Default.SizeTcpByteArray;
 				Sb = new StringBuilder();
+				SizeTcpByteArray = 65000;
 				ReceiveBuffer = new byte[ SizeTcpByteArray ];
 			}
 		}
@@ -58,6 +58,7 @@ namespace AsyncSockets
 			SocketFlags socketFlags;
 			int offset;
 
+			Logger.WriteEntry( "BeginReceive() entry" );
 			offset = 0;
 			socketFlags = SocketFlags.None;
 			ConnectedSocket.BeginReceive( ReceiveState.ReceiveBuffer, offset, ReceiveState.SizeTcpByteArray, socketFlags,
@@ -75,6 +76,7 @@ namespace AsyncSockets
 				BeginReceive();
 
 				//	Wait for the final callback signal.
+				Logger.WriteEntry( "ReceiveDoneEvent.WaitOne() will wait for signal." );
 				ReceiveDoneEvent.WaitOne();
 			}
 			catch( Exception e )
@@ -97,6 +99,8 @@ namespace AsyncSockets
 
 				if( bytesRead > 0 )
 				{
+					Logger.WriteEntry( "ReceiveCallBack() Received " + bytesRead.ToString() );
+
 					// Accumulate the received text. 
 					string receivedText = Encoding.ASCII.GetString( asyncReceiveState.ReceiveBuffer, 0, bytesRead );
 					asyncReceiveState.Sb.Append( receivedText );
@@ -106,11 +110,14 @@ namespace AsyncSockets
 				}
 				else
 				{
+					Logger.WriteEntry( "ReceiveCallBack() Received 0 bytes.  Should be done. " );
+
 					//	All the text has arrived.  
 					if( asyncReceiveState.Sb.Length > 1 )
 					{
 						this.ReceivedText = asyncReceiveState.Sb.ToString();
 					}
+					Logger.WriteEntry( "ReceiveDoneEvent.Set() to signal completion." );
 					//	Signal the completion of the message.  
 					ReceiveDoneEvent.Set();
 				}
