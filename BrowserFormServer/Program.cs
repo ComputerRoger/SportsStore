@@ -25,20 +25,18 @@ namespace BrowserFormServer
 
 			//	Create the application document to maintain state.
 			AppDocument appDocument;
-			BrowserDocument browserDocument;
 			MainForm mainForm;
 
-			browserDocument = new BrowserDocument();
-			appDocument = new AppDocument( browserDocument );
+			appDocument = new AppDocument();
 			mainForm = appDocument.MainForm;
 
 			//	Provide a container for the TCP/IP server.
 			int serverPort = BrowserFormServer.Properties.Settings.Default.BrowserServerPort;
 			int sizeThreadPool = BrowserFormServer.Properties.Settings.Default.SizeThreadPool;
+			IThreadDispatcher threadDispatcher = new PoolThreadDispatcher( sizeThreadPool );
 			IProtocolFactory protocolFactory = new BrowserServerProtocolFactory();
 			ILogger logger = new ConsoleLogger();
-			IThreadDispatcher threadDispatcher = new PoolThreadDispatcher( sizeThreadPool );
-			TcpServer tcpServer = new TcpServer( serverPort, threadDispatcher, protocolFactory, logger );
+			TcpServer tcpServer = new TcpServer( serverPort, threadDispatcher, protocolFactory, logger, appDocument );
 
 			//	Serve TCP/IP on a separate thread.
 			System.Threading.Thread serverThread;

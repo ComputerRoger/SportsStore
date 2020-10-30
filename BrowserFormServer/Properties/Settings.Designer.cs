@@ -49,5 +49,14 @@ namespace BrowserFormServer.Properties {
                 return ((int)(this["ListenBacklogSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int SizeBrowserPool {
+            get {
+                return ((int)(this["SizeBrowserPool"]));
+            }
+        }
     }
 }

@@ -10,18 +10,23 @@ using GeneralClassLibrary;
 
 namespace AsyncSockets
 {
+	public interface IAppDocument
+	{}
+
 	public class TcpServer
 	{
-		public TcpServer( int serverPort, IThreadDispatcher threadDispatcher, IProtocolFactory protocolFactory, ILogger logger )
+		public TcpServer( int serverPort, IThreadDispatcher threadDispatcher, IProtocolFactory protocolFactory, ILogger logger, IAppDocument appDocument )
 		{
 			ServerPort = serverPort;
 			ThreadDispatcher = threadDispatcher;
 			ProtocolFactory = protocolFactory;
 			Logger = logger;
+			AppDocument = appDocument;
 		}
 
 		#region Properties.
 		
+		public IAppDocument AppDocument { get; protected set; }
 		public int ServerPort { get; protected set; }
 		public IThreadDispatcher ThreadDispatcher { get; protected set; }
 		public ILogger Logger { get; protected set; }
@@ -41,7 +46,7 @@ namespace AsyncSockets
 			tcpListener.Start();
 
 			//	Dispatch service to each connection.
-			ThreadDispatcher.StartDispatching( tcpListener, Logger, ProtocolFactory );
+			ThreadDispatcher.StartDispatching( tcpListener, Logger, ProtocolFactory, AppDocument );
 		}
 	}
 }

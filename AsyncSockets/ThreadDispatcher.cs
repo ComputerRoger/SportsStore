@@ -11,12 +11,12 @@ namespace AsyncSockets
 {
 	public interface IThreadDispatcher
 	{
-		void StartDispatching( TcpListener listener, ILogger logger, IProtocolFactory protocolFactory );
+		void StartDispatching( TcpListener listener, ILogger logger, IProtocolFactory protocolFactory, IAppDocument appDocument );
 	}
 
 	public class ClientThreadDispatcher : IThreadDispatcher
 	{
-		public void StartDispatching( TcpListener tcpListener, ILogger logger, IProtocolFactory protocolFactory )
+		public void StartDispatching( TcpListener tcpListener, ILogger logger, IProtocolFactory protocolFactory, IAppDocument appDocument )
 		{
 			IServerProtocol serverProtocol;
 			tcpListener.Start();
@@ -31,7 +31,7 @@ namespace AsyncSockets
 					serverProtocol = protocolFactory.CreateServerProtocol( clientSocket, logger );
 
 					//	A client has connected so create a thread to handle it.
-					ThreadStart clientThreadStart = new ThreadStart( serverProtocol.HandleClientConnection );
+					ParameterizedThreadStart clientThreadStart = new ParameterizedThreadStart( serverProtocol.HandleClientConnection );
 					Thread clientThread = new Thread( clientThreadStart )
 					{
 						IsBackground = true
@@ -57,14 +57,14 @@ namespace AsyncSockets
 			this.m_SizeThreadPool = sizeThreadPool;
 		}
 
-		public void StartDispatching( TcpListener tcpListener, ILogger logger, IProtocolFactory protocolFactory )
+		public void StartDispatching( TcpListener tcpListener, ILogger logger, IProtocolFactory protocolFactory, IAppDocument appDocument )
 		{
 			tcpListener.Start();
 
 			//	Create the limited number of threads accepting connections.
 			for( int indexThread = 0; indexThread < this.m_SizeThreadPool; indexThread++ )
 			{
-				DispatchLoop dispatchLoop = new DispatchLoop( tcpListener, logger, protocolFactory );
+				DispatchLoop dispatchLoop = new DispatchLoop( tcpListener, logger, protocolFactory, appDocument );
 				ThreadStart clientThreadStart = new ThreadStart( dispatchLoop.RunDispatcher );
 				Thread clientThread = new Thread( clientThreadStart );
 				clientThread.Start();
@@ -79,13 +79,16 @@ namespace AsyncSockets
 		private readonly TcpListener m_TcpListener;
 		private readonly ILogger m_Logger;
 		private readonly IProtocolFactory m_ProtocolFactory;
+		public IAppDocument AppDocument { get; protected set; }
 
-		public DispatchLoop( TcpListener tcpListener, ILogger logger, IProtocolFactory protocolFactory )
+		public DispatchLoop( TcpListener tcpListener, ILogger logger, IProtocolFactory protocolFactory, IAppDocument appDocument )
 		{
 			this.m_TcpListener = tcpListener;
 			this.m_Logger = logger;
 			this.m_ProtocolFactory = protocolFactory;
+			this.AppDocument = appDocument;
 		}
+
 
 		public void RunDispatcher()
 		{
@@ -101,7 +104,7 @@ namespace AsyncSockets
 					serverProtocol = this.m_ProtocolFactory.CreateServerProtocol( clientSocket, m_Logger );
 
 					//	A client has connected so create a thread to handle it.
-					serverProtocol.HandleClientConnection();
+					serverProtocol.HandleClientConnection( AppDocument );
 				}
 				catch( System.IO.IOException ioException )
 				{

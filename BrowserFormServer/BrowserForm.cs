@@ -11,32 +11,53 @@ using MtrDev.WebView2.Winforms;
 using MtrDev.WebView2.Wrapper;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace BrowserFormServer
 {
 	public partial class BrowserForm : Form
 	{
-		private readonly IAppDocument m_AppDocument;
-
-		public BrowserForm( IAppDocument appDocument )
+		public BrowserForm( AppDocument appDocument )
 		{
-			m_AppDocument = appDocument;
+			AppDocument = appDocument;
+			BrowserDocument = new BrowserDocument();
 
 			InitializeComponent();
 			HookupEvents();
-
-			//BrowserControl.Size = new Size( 0,0 );
-			Navigate( @"https://this-page-intentionally-left-blank.org/" );
-			//Navigate( @"https://www.amazon.com" );
 		}
 
 		#region Propterties.
 
-		protected IAppDocument AppDocument => ( m_AppDocument );
-
+		public AppDocument AppDocument { get; protected set; }
+		public BrowserDocument BrowserDocument { get; protected set; }
+		public string NavigationResults { get; protected set; }
 		#endregion
 
 		#region Methods.
+
+		public delegate string BrowserWorkDelegate( string url );
+
+		//	The delegate should match this method.
+		public string BrowserWork( string url )
+		{
+			string resultText;
+
+			resultText = "";
+			//	Prepare to wait for results.
+
+			BrowserDocument.NavigateManualResetEvent = new ManualResetEvent( false );
+			BrowserDocument.NavigateManualResetEvent.Reset();
+			resultText = "";
+			NavigationResults = "";
+
+			//	Start the navigation process.
+			Navigate( url );
+
+			//	The event handlers will save the results.
+			//	After saving the results, the event handlers will set the ManualResetEvent.
+
+			return ( resultText );
+		}
 
 		public void Navigate( string url )
 		{
@@ -62,12 +83,13 @@ namespace BrowserFormServer
 			return xmlText;
 		}
 
+		//	This callback method is executed after ExecuteScript is complete.
 		public void GetDomText( ExecuteScriptCompletedEventArgs executeScriptCompletedEventArgs )
 		{
 			IBrowserDocument browserDocument;
 			string jsonText;
 
-			browserDocument = AppDocument.BrowserDocument;
+			browserDocument = this.BrowserDocument;
 
 			jsonText = executeScriptCompletedEventArgs.ResultAsJson;
 
@@ -84,15 +106,17 @@ namespace BrowserFormServer
 
 			//string clearHtml = BrowserDocument.RemoveNonContent( htmlText );
 			//string clearXml = BrowserDocument.RemoveNonContent( xmlText );
+
+			//	Signal that navigation has completed and results have been parsed.
+			NavigationResults = browserDocument.DomText;
+			BrowserDocument.NavigateManualResetEvent.Set();
 		}
 
 		protected void NavigationCompleted( object sender, MtrDev.WebView2.Wrapper.NavigationCompletedEventArgs e )
 		{
 			Action<ExecuteScriptCompletedEventArgs> scriptAction;
-			IBrowserDocument browserDocument;
 			string javascriptText;
 
-			browserDocument = AppDocument.BrowserDocument;
 			scriptAction = new Action<ExecuteScriptCompletedEventArgs>( GetDomText );
 			javascriptText = "document.documentElement.innerHTML";
 			this.BrowserControl.ExecuteScript( javascriptText, scriptAction );
@@ -117,3 +141,7 @@ namespace BrowserFormServer
 		#endregion
 	}
 }
+
+//BrowserControl.Size = new Size( 0,0 );
+//Navigate( @"https://this-page-intentionally-left-blank.org/" );
+//Navigate( @"https://www.amazon.com" );

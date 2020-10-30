@@ -12,6 +12,8 @@ using MtrDev.WebView2.Wrapper;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace BrowserFormServer
 {
@@ -20,11 +22,10 @@ namespace BrowserFormServer
 		private readonly System.ComponentModel.IContainer components = null;
 		private Label label1;
 		private Label label2;
-		private readonly IAppDocument m_AppDocument;
 
-		public MainForm( IAppDocument appDocument )
+		public MainForm( AppDocument appDocument )
 		{
-			m_AppDocument = appDocument;
+			AppDocument = appDocument;
 
 			InitializeComponent();
 			HookupEvents();
@@ -32,7 +33,7 @@ namespace BrowserFormServer
 
 		#region Propterties.
 
-		protected IAppDocument AppDocument => ( m_AppDocument );
+		public AppDocument AppDocument { get; protected set; }
 		#endregion
 
 		#region Methods.
@@ -77,7 +78,6 @@ namespace BrowserFormServer
 			this.MinimizeBox = false;
 			this.Name = "MainForm";
 			this.Text = "MainForm";
-			this.Load += new System.EventHandler(this.MainForm_Load_1);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -107,26 +107,52 @@ namespace BrowserFormServer
 		#endregion
 
 		#region Methods.
+		public delegate BrowserForm StartBrowserFormDelegate();
+		public delegate bool StopBrowserFormDelegate( BrowserForm browserForm );
 
 		public BrowserForm StartBrowserForm()
 		{
 			BrowserForm browserForm;
 
-			//	Create a modeless window.
-			browserForm = new BrowserForm( AppDocument )
+			if( AppDocument.PoolBrowserForms.Count > 0 )
 			{
-				Owner = this
-			};
-
+				browserForm = AppDocument.PoolBrowserForms.Pop();
+			}
+			else
+			{
+				//	Create a modeless window.
+				browserForm = new BrowserForm( this.AppDocument )
+				{
+					Owner = this
+				};
+			}
 			browserForm.Show();
+
+			AppDocument.ActiveBrowserForms.Add( browserForm );
+
 			return ( browserForm );
 		}
-		#endregion
-
-		private void MainForm_Load_1( object sender, EventArgs e )
+		public bool StopBrowserForm( BrowserForm browserForm )
 		{
+			bool isRemove;
 
+			isRemove = AppDocument.ActiveBrowserForms.Remove( browserForm );
+			Debug.Assert( isRemove, "Could not remove a browser form from the active list." );
+			browserForm.Hide();
+
+			if( AppDocument.PoolBrowserForms.Count > Properties.Settings.Default.SizeBrowserPool )
+			{
+				//	When a form is closed, all resources created within the object are closed and the form is disposed.
+				browserForm.Close();
+			}
+			else
+			{
+				AppDocument.PoolBrowserForms.Push( browserForm );
+			}
+
+			return ( isRemove );
 		}
+		#endregion
 	}
 }
 

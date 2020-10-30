@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace BrowserFormServer
 {
@@ -14,12 +15,19 @@ namespace BrowserFormServer
 		string DomNoScript();
 		string XmlNoScript();
 		Uri Uri { get; set; }
+		ManualResetEvent NavigateManualResetEvent { get; set; }
 	}
 	public class BrowserDocument : IBrowserDocument
 	{
 		Uri m_Uri;
 		string m_DomText;
 		string m_XmlText;
+		public ManualResetEvent NavigateManualResetEvent { get; set; }
+
+		public BrowserDocument()
+		{
+			NavigateManualResetEvent = new ManualResetEvent( false );
+		}
 
 		public String DomText
 		{

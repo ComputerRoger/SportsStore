@@ -10,6 +10,7 @@ using System.IO;
 using System.IO.Ports;
 using System.ComponentModel;
 
+
 namespace BrowserFormServer
 {
 	public class BrowserServerProtocol : IServerProtocol
@@ -37,7 +38,7 @@ namespace BrowserFormServer
 		//	The client should close the socket.
 		//	However, in HTTP, it is the server that closes the connection.
 		//	That is why HTTP is a connectionless protocol.
-		public async void HandleClientConnection()
+		public async void HandleClientConnection( object appDocument )
 		{
 			BufferedStream bufferedStream;
 			ILogger logger;
@@ -54,7 +55,7 @@ namespace BrowserFormServer
 
 			NetworkStream networkStream = tcpClient.GetStream();
 			bufferedStream = new BufferedStream( networkStream, SizeStreamBuffer );
-			await SendReceiveReply.ReceiveServiceReply( bufferedStream, serviceRequest, logger );
+			await SendReceiveReply.ReceiveServiceReply( bufferedStream, serviceRequest, logger, ( IAppDocument ) appDocument );
 			bufferedStream.Close();
 			logger.WriteEntry( methodName + " done" );
 		}
@@ -62,18 +63,50 @@ namespace BrowserFormServer
 
 	public class ServiceRequest : IServiceRequest
 	{
-		public async Task<RequestResponseFrame> DoSomeWork( ITcpFrame requestFrame )
+		public string NavigateAndSync( BrowserForm browserForm, AppDocument appDocument )
 		{
-			await Task.Delay(10000);
+			BrowserForm.BrowserWorkDelegate browserWorkDelegate;
+			browserWorkDelegate = new BrowserForm.BrowserWorkDelegate( browserForm.BrowserWork );
+			object[] args = new object[ 1 ];
+			args[ 0 ] = "https://amazon.com";
+			string result = ( string ) browserForm.Invoke( browserWorkDelegate, args );
+			return ( result );
+		}
+		public async Task<RequestResponseFrame> DoSomeWork( ITcpFrame requestFrame, AppDocument appDocument )
+		{
+			MainForm mainForm = appDocument.MainForm;
+
+			//	Start the browser.
+			MainForm.StartBrowserFormDelegate startBrowserFormDelegate;
+			startBrowserFormDelegate = new MainForm.StartBrowserFormDelegate( mainForm.StartBrowserForm );
+			BrowserForm browserForm = ( BrowserForm ) mainForm.Invoke( startBrowserFormDelegate );
+
+			//	Do some more work.
+			string result = NavigateAndSync( browserForm, appDocument );
+			BrowserDocument browserDocument = browserForm.BrowserDocument;
+
+			//	Wait until all navigation results are completed.
+			browserDocument.NavigateManualResetEvent.WaitOne();
+			result = browserDocument.DomText;
+
+			//	Generate a response to the client.
 			RequestResponseFrame requestResponseFrame = new RequestResponseFrame( requestFrame.FramePacket );
+
+			//	Stop the browser.
+			MainForm.StopBrowserFormDelegate stopBrowserFormDelegate;
+			stopBrowserFormDelegate = new MainForm.StopBrowserFormDelegate( mainForm.StopBrowserForm );
+			object[] args = new object[ 1 ];
+			args[ 0 ] = browserForm;
+			bool isRemoved = ( bool ) mainForm.Invoke( stopBrowserFormDelegate, args );
 			return requestResponseFrame;
 		}
 
-		public async Task<ITcpFrame> ServiceTheRequest( ITcpFrame requestFrame, ILogger logger )
+		public async Task<ITcpFrame> ServiceTheRequest( ITcpFrame requestFrame, ILogger logger, IAppDocument appDocument )
 		{
 			ITcpFrame tcpFrame;
+			AppDocument theDocument = ( AppDocument ) appDocument;
 
-			tcpFrame = await DoSomeWork( requestFrame );
+			tcpFrame = await DoSomeWork( requestFrame, theDocument );
 			return tcpFrame;
 		}
 	}

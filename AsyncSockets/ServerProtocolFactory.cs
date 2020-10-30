@@ -11,7 +11,7 @@ namespace AsyncSockets
 {
 	public interface IServerProtocol
 	{
-		void HandleClientConnection();
+		void HandleClientConnection( object appDocument );
 	}
 
 	public interface IProtocolFactory

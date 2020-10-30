@@ -2,39 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using AsyncSockets;
 
 namespace BrowserFormServer
 {
-	public interface IAppDocument
-	{
-		IBrowserDocument BrowserDocument { get; }
-	}
-
 	public class AppDocument : IAppDocument
 	{
-		readonly IBrowserDocument m_BrowserDocument;
-		readonly MainForm m_MainForm;
-
-		public AppDocument( IBrowserDocument browserDocument )
+		public AppDocument()
 		{
-			m_BrowserDocument = browserDocument;
-			m_MainForm = new MainForm( this );
+			MainForm = new MainForm( this );
+			ActiveBrowserForms = new List<BrowserForm>();
+			PoolBrowserForms = new Stack<BrowserForm>();
 		}
 
-		public IBrowserDocument BrowserDocument
-		{
-			get
-			{
-				return ( m_BrowserDocument );
-			}
-		}
-		public MainForm MainForm
-		{
-			get
-			{
-				return m_MainForm;
-			}
-		}
+
+		public MainForm MainForm { get; protected set; }
+
+		public List<BrowserForm> ActiveBrowserForms { get; protected set; }
+		public Stack<BrowserForm> PoolBrowserForms { get; protected set; }
 	}
 }

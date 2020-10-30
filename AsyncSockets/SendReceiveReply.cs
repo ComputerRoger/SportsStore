@@ -139,7 +139,7 @@ namespace AsyncSockets
 		}
 
 		//	Receive a request. Service the request. Reply with the result.
-		static public async Task<int> ReceiveServiceReply( BufferedStream bufferedStream, IServiceRequest serviceRequest, ILogger logger )
+		static public async Task<int> ReceiveServiceReply( BufferedStream bufferedStream, IServiceRequest serviceRequest, ILogger logger, IAppDocument appDocument )
 		{
 			int numberSent;
 
@@ -147,7 +147,7 @@ namespace AsyncSockets
 			ITcpFrame requestFrame = await ReceiveFrame( bufferedStream, logger );
 
 			//	Service the request.
-			ITcpFrame responseFrame = await serviceRequest.ServiceTheRequest( requestFrame, logger );
+			ITcpFrame responseFrame = await serviceRequest.ServiceTheRequest( requestFrame, logger, appDocument );
 
 			//	Reply the response to the client.
 			numberSent = await SendFrame( responseFrame, bufferedStream, logger );
@@ -178,6 +178,6 @@ namespace AsyncSockets
 	//	A server business object will process a request frame to produce a response frame.
 	public interface IServiceRequest
 	{
-		Task<ITcpFrame> ServiceTheRequest( ITcpFrame requestFrame, ILogger logger );
+		Task<ITcpFrame> ServiceTheRequest( ITcpFrame requestFrame, ILogger logger, IAppDocument appDocument );
 	}
 }
