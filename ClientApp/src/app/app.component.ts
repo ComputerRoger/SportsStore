@@ -3,9 +3,6 @@ import { Repository } from "./models/repository";
 import { Product } from "./models/product.model";
 import { Supplier } from "./models/supplier.model";
 import { ErrorHandlerService } from "./errorHandler.service";
-import { DateObservableService } from "./websockets/dateObservable.service";
-import { TextObservableService } from "./websockets/textObservable.service";
-import { Observable } from 'rxjs';
 
 //	npm install @aspnet/signalr --save --force
 
@@ -19,22 +16,15 @@ import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 })
 export class AppComponent implements OnInit
 {
-	title = 'SportsStore';
-	private lastError: string[];
-	public dateObservable: Observable<Date>;
-	public textObservable: Observable<string>;
+	private lastErrors: string[];
 
 	constructor(private repository: Repository,
-		errorService: ErrorHandlerService,
-		private dateObservableService: DateObservableService,
-		public textObservableService: TextObservableService)
+		errorService: ErrorHandlerService)
 	{
-		errorService.errors.subscribe(error =>
+		errorService.errors.subscribe(errors =>
 		{
-			this.lastError = error;
+			this.lastErrors = errors;
 		});
-		this.dateObservable = dateObservableService.createObservableService();
-		this.textObservable = textObservableService.createObservableService();
 	}
 	ngOnInit()
 	{
@@ -43,9 +33,9 @@ export class AppComponent implements OnInit
 
 	//////////////////////////	  Properties.		////////////////////
 
-	get error(): string[]
+	get errors(): string[]
 	{
-		return this.lastError;
+		return this.lastErrors;
 	}
 
 	get product(): Product
@@ -61,7 +51,7 @@ export class AppComponent implements OnInit
 
 	clearError()
 	{
-		this.lastError = null;
+		this.lastErrors = null;
 	}
 
 	///////////////////////////		Event handlers to initiate POSTs.		///////////////////

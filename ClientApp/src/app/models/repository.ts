@@ -5,7 +5,7 @@ import { Product } from './product.model';
 import { Supplier } from './supplier.model';
 import { Filter, Pagination } from './configClasses.repository';
 import { Observable } from "rxjs";
-import { Order, OrderConfirmation } from "./order.model";
+import { Order, OrderConfirmation } from './order.model';
 import { SignalRService } from "./signalR.service";
 
 //	Define the MVC Route patterns associated with Controller prefixes.
@@ -21,8 +21,29 @@ const queryBrowserUrl = "/api/queryBrowser";		//	QueryBrowserController
 type ProductsMetadata =
 	{
 		products: Product[],
-		categories: string[];
+		categories: string[]
 	}
+
+//	Define the container for posting data to the web API.
+export class PostQueryBody
+{
+	public receiveUrl: string;
+	public receiveSearch: string;
+
+	constructor(receiveUrl: string, receiveSearch: string)
+	{
+		this.receiveUrl = receiveUrl;
+		this.receiveSearch = receiveSearch;
+	}
+}
+
+export class QueryBrowserResult
+{
+	constructor(public textArray: string[]
+		, public isError: boolean
+		, public isSuccess: boolean
+		) { }
+}
 
 //	REPORTING:			HTTP verb API	>>	Repository properties	>>	Component properties	>>	Template controls
 //	PERSISTING:			Template events	>>	Component handlers	>>	Repository methods	>>	HTTP verb API
@@ -43,6 +64,7 @@ export class Repository
 	{
 		//	Set the filters.
 		//this.filter.category = "soccer";
+
 		this.filter.related = true;
 	}
 
@@ -52,11 +74,14 @@ export class Repository
 		this.httpClient.get<String>(actionPath).subscribe(() => { });
 	}
 
-	queryBrowserPost()
+
+	queryBrowserPost(postQueryBody: PostQueryBody)
 	{
 		let actionPath = queryBrowserUrl + "/Test";
-		this.httpClient.post(actionPath, null).subscribe(() => { });
+		let queryBrowserResult = this.httpClient.post<QueryBrowserResult>(actionPath, postQueryBody);
+		return queryBrowserResult;
 	}
+
 	//////////////////////		Authentication Methods			////////////////////////
 
 	login(name: string, password: string): Observable<boolean>
@@ -98,6 +123,14 @@ export class Repository
 		this.httpClient.get<Order[]>(ordersUrl)
 			.subscribe(data => this.orders = data);
 	}
+
+
+	// export class OrderConfirmation
+	// {
+	// 	constructor(public orderId: number,
+	// 		public authCode: string,
+	// 		public amount: number) { }
+	// }
 
 	createOrder(order: Order)
 	{

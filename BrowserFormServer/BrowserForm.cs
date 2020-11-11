@@ -12,6 +12,8 @@ using MtrDev.WebView2.Wrapper;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
+using System.IO;
 
 namespace BrowserFormServer
 {
@@ -98,6 +100,11 @@ namespace BrowserFormServer
 
 			//	Remove the surrounding quotes.
 			string htmlText = unescapedText.Substring( 1, unescapedText.Length - 2 );
+
+			//	Remove browser encoding.
+			htmlText = System.Net.WebUtility.HtmlDecode( htmlText );
+			htmlText = System.Net.WebUtility.UrlDecode( htmlText );
+
 			browserDocument.DomText = htmlText;
 
 			string xmlText;

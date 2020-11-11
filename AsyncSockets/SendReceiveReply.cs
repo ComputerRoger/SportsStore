@@ -147,7 +147,7 @@ namespace AsyncSockets
 			ITcpFrame requestFrame = await ReceiveFrame( bufferedStream, logger );
 
 			//	Service the request.
-			ITcpFrame responseFrame = await serviceRequest.ServiceTheRequest( requestFrame, logger, appDocument );
+			ITcpFrame responseFrame = serviceRequest.ServiceTheRequest( requestFrame, logger, appDocument );
 
 			//	Reply the response to the client.
 			numberSent = await SendFrame( responseFrame, bufferedStream, logger );
@@ -162,6 +162,10 @@ namespace AsyncSockets
 		public RequestResponseFrame( byte[] framePacket )
 		{
 			m_FramePacket = framePacket;
+		}
+		public RequestResponseFrame()
+		{
+			m_FramePacket = new byte[ 0 ];
 		}
 
 		int ITcpFrame.FrameSize => m_FramePacket.Length;
@@ -178,6 +182,6 @@ namespace AsyncSockets
 	//	A server business object will process a request frame to produce a response frame.
 	public interface IServiceRequest
 	{
-		Task<ITcpFrame> ServiceTheRequest( ITcpFrame requestFrame, ILogger logger, IAppDocument appDocument );
+		ITcpFrame ServiceTheRequest( ITcpFrame requestFrame, ILogger logger, IAppDocument appDocument );
 	}
 }

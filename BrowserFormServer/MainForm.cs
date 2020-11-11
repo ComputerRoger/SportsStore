@@ -114,42 +114,16 @@ namespace BrowserFormServer
 		{
 			BrowserForm browserForm;
 
-			if( AppDocument.PoolBrowserForms.Count > 0 )
-			{
-				browserForm = AppDocument.PoolBrowserForms.Pop();
-			}
-			else
-			{
-				//	Create a modeless window.
-				browserForm = new BrowserForm( this.AppDocument )
-				{
-					Owner = this
-				};
-			}
-			browserForm.Show();
-
-			AppDocument.ActiveBrowserForms.Add( browserForm );
-
+			//	The lists are protected by a lock.
+			browserForm = AppDocument.StartBrowserForm( this );
 			return ( browserForm );
 		}
 		public bool StopBrowserForm( BrowserForm browserForm )
 		{
 			bool isRemove;
 
-			isRemove = AppDocument.ActiveBrowserForms.Remove( browserForm );
-			Debug.Assert( isRemove, "Could not remove a browser form from the active list." );
-			browserForm.Hide();
-
-			if( AppDocument.PoolBrowserForms.Count > Properties.Settings.Default.SizeBrowserPool )
-			{
-				//	When a form is closed, all resources created within the object are closed and the form is disposed.
-				browserForm.Close();
-			}
-			else
-			{
-				AppDocument.PoolBrowserForms.Push( browserForm );
-			}
-
+			//	The lists are protected by a lock.
+			isRemove = AppDocument.StopBrowserForm( browserForm );
 			return ( isRemove );
 		}
 		#endregion

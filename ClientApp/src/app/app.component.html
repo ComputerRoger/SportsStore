@@ -1,13 +1,11 @@
-<h2>
-	SportsStore Angular Top {{dateObservable | async | date:'medium'}} {{textObservable | async}}
-</h2>
-<div class="bg-danger text-white text-center p-2 m-2" *ngIf="error != null">
-	<h6 *ngFor="let e of error">
-		{{
-e
-		}}
+<app-develop></app-develop>
+
+
+<div class="mat-headline" *ngIf="errors != null">
+	<h6 *ngFor="let errorItem of errors">
+		{{ errorItem }}
 	</h6>
-	<button class="btn btn-warning" (click)="clearError()">OK</button>
+	<button mat-raised-button color="warn" (click)="clearError()">OK</button>
 </div>
 
 <router-outlet></router-outlet>

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
 
 namespace BrowserFormServer
 {
@@ -53,7 +54,9 @@ namespace BrowserFormServer
 		}
 
 		public String DomNoScript() => RemoveScriptTags( DomText );
+		public String DomContentOnly() => RemoveNonContent( DomText );
 		public String XmlNoScript() => RemoveScriptTags( XmlText );
+		public String XmlContentOnly() => RemoveNonContent( XmlText );
 
 		public Uri Uri
 		{
@@ -168,6 +171,17 @@ namespace BrowserFormServer
 			return ( text );
 		}
 
+		//	Remove comments <!-- thru -->
+		public static string RemoveComments( string rawText )
+		{
+			string text;
+
+			text = rawText;
+			text = Regex.Replace( text, @"<!--[\s\S]*?-->", "", RegexOptions.Singleline | RegexOptions.IgnoreCase );
+			//xmlFileContent.replaceAll( "<!--[\s\S]*?-->", "" );
+			return ( text );
+		}
+
 		public static string RemoveNonContent( string rawText )
 		{
 			string text;
@@ -189,6 +203,8 @@ namespace BrowserFormServer
 			text = RemoveWhiteSpace( text );
 
 			text = RemoveNewLines( text );
+
+			text = RemoveComments( text );
 			return ( text );
 		}
 		/**

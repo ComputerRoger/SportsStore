@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Repository } from "../models/repository";
+import { Repository, PostQueryBody, QueryBrowserResult } from "../models/repository";
 import { Product } from "../models/product.model";
 import { Supplier } from "../models/supplier.model";
 
@@ -24,6 +24,7 @@ export class ProductSelectionComponent
 	}
 	TestMePost()
 	{
-		this.repository.queryBrowserPost();
+		let postQueryBody = new PostQueryBody("https://google.com", "C++");
+		let queryBrowserResult = this.repository.queryBrowserPost(postQueryBody);
 	}
 }
