@@ -90,7 +90,7 @@ namespace ServerApp.Controllers
 			ByteArrayBase byteArrayBase = ResultWebPageIpc.FromByteArray(replyFrameBytes);
 
 			//	Transform the ITcpFrame to an API response.
-			logger.WriteEntry(methodName + " building the JSON result.");
+			logger.WriteEntry(methodName + " building the JSON result. ");
 			object jsonObject;
 			switch (byteArrayBase.BrowserIpc)
 			{
