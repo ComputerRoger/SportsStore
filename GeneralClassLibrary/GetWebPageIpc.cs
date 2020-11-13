@@ -6,25 +6,25 @@ using System.Threading.Tasks;
 
 namespace GeneralClassLibrary
 {
-	[Serializable]
-	public class GetWebPageIpc : ByteArrayBase
-	{
-		public GetWebPageIpc( QueryBody postQueryBody ) : base( BrowserIpcEnum.GetWebPage )
-		{
-			PostQueryBody = postQueryBody;
-		}
+	//[Serializable]
+	//public class GetWebPageIpc : ByteArrayBase
+	//{
+	//	public GetWebPageIpc( QueryBody postQueryBody ) : base( BrowserIpcEnum.GetWebPage )
+	//	{
+	//		PostQueryBody = postQueryBody;
+	//	}
 
-		public QueryBody PostQueryBody { get; protected set; }
-	}
+	//	public QueryBody PostQueryBody { get; protected set; }
+	//}
 
-	[Serializable]
-	public class ResultWebPageIpc : ByteArrayBase
-	{
-		public ResultWebPageIpc( ResultQueryBody resultQueryBody ) : base( BrowserIpcEnum.ResultWebPage )
-		{
-			ResultQueryBody = resultQueryBody;
-		}
+	//[Serializable]
+	//public class ResultWebPageIpc : ByteArrayBase
+	//{
+	//	public ResultWebPageIpc( ResultQueryBody resultQueryBody ) : base( ServiceActionEnum.XmlPageRequestServiceAction )
+	//	{
+	//		ResultQueryBody = resultQueryBody;
+	//	}
 
-		public ResultQueryBody ResultQueryBody { get; protected set; }
-	}
+	//	public ResultQueryBody ResultQueryBody { get; protected set; }
+	//}
 }

@@ -12,34 +12,28 @@ using System.Runtime.CompilerServices;
 namespace GeneralClassLibrary
 {
 	[Serializable]
-	public class ByteArrayBase
+	public class IpcFrameBase
 	{
-		public enum BrowserIpcEnum
-		{
-			GetWebPage,
-			ResultWebPage,
-			SIZE_BrowserIpcEnum
-		}
-		public BrowserIpcEnum BrowserIpc { get; protected set; }
+		public ServiceActionEnum ServiceActionEnum { get; protected set; }
 
-		public ByteArrayBase()
+		public IpcFrameBase()
 		{
-			this.BrowserIpc = BrowserIpcEnum.SIZE_BrowserIpcEnum;
+			this.ServiceActionEnum = ServiceActionEnum.SizeServiceActionEnum;
 		}
-		public ByteArrayBase( BrowserIpcEnum browserIpcEnum )
+		public IpcFrameBase( ServiceActionEnum serviceActionEnum )
 		{
-			this.BrowserIpc = browserIpcEnum;
+			this.ServiceActionEnum = serviceActionEnum;
 		}
 
 		public byte[] ToByteArray()
 		{
-			byte[] thisByteArray = ByteArrayBase.ObjectToByteArray( this );
+			byte[] thisByteArray = IpcFrameBase.ObjectToByteArray( this );
 			return thisByteArray;
 		}
-		public static ByteArrayBase FromByteArray( byte[] byteArray )
+		public static IpcFrameBase FromByteArray( byte[] byteArray )
 		{
-			ByteArrayBase byteArrayBase = ( ByteArrayBase ) ByteArrayBase.ByteArrayToObject( byteArray );
-			return byteArrayBase;
+			IpcFrameBase ipcFrameBase = ( IpcFrameBase ) IpcFrameBase.ByteArrayToObject( byteArray );
+			return ipcFrameBase;
 		}
 
 		public bool TestByteArray( ILogger logger )

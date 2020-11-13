@@ -147,7 +147,8 @@ namespace AsyncSockets
 			ITcpFrame requestFrame = await ReceiveFrame( bufferedStream, logger );
 
 			//	Service the request.
-			ITcpFrame responseFrame = serviceRequest.ServiceTheRequest( requestFrame, logger, appDocument );
+			IPerformService performService = serviceRequest.CreateService( requestFrame, logger );
+			ITcpFrame responseFrame = performService.PerformService( logger, appDocument );
 
 			//	Reply the response to the client.
 			numberSent = await SendFrame( responseFrame, bufferedStream, logger );
@@ -182,6 +183,12 @@ namespace AsyncSockets
 	//	A server business object will process a request frame to produce a response frame.
 	public interface IServiceRequest
 	{
-		ITcpFrame ServiceTheRequest( ITcpFrame requestFrame, ILogger logger, IAppDocument appDocument );
+		IPerformService CreateService( ITcpFrame requestFrame, ILogger logger );
+	}
+
+	//	A server business object will process a request frame to produce a response frame.
+	public interface IPerformService
+	{
+		ITcpFrame PerformService( ILogger logger, IAppDocument appDocument );
 	}
 }

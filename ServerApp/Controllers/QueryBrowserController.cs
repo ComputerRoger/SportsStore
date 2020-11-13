@@ -25,131 +25,93 @@ namespace ServerApp.Controllers
 
 		public QueryBrowserController()
 		{
-			RemoteHostName = "127.0.0.1";
-			RemotePortNumber = 50500;
-			SizeStreamBuffer = 65535;
+			RemoteHostName = GeneralClassLibrary.Constants.BrowserServerHostName;
+			RemotePortNumber = GeneralClassLibrary.Constants.BrowserServerPortNumber;
+			SizeStreamBuffer = GeneralClassLibrary.Constants.SizeStreamBuffer;
 		}
-
 
 		//	Post-Redirect-Get pattern.
 		[AllowAnonymous]        //	All access by any user.
-		[HttpPost("/api/QueryBrowser/Test")]
-		public async Task<IActionResult> TestSendReceive([FromBody] QueryBody postQueryBody)
+		[HttpPost( "/api/QueryBrowser/Test" )]
+		public async Task<IActionResult> TestSendReceive( [FromBody] XmlPageRequestBody xmlPageRequestBody )
 		{
 			ILogger logger = new ConsoleLogger();
 			JsonResult jsonResult;
-			ResultQueryBody resultQueryBody;
 			RequestResponseFrame responseFrame;
+			object jsonObject;
 
 			string methodName = "TestSendReceive";
 
-			logger.WriteEntry(methodName + " entry.");
+			logger.WriteEntry( methodName + " entry." );
 
-			if (ModelState.IsValid)
+			if( ModelState.IsValid )
 			{
-				logger.WriteEntry(methodName + " ModelState is valid.");
-				string receiveUrl = postQueryBody.ReceiveUrl;
-				string receiveSearch = postQueryBody.ReceiveSearch;
+				logger.WriteEntry( methodName + " ModelState is valid." );
 
-				if (receiveUrl is null)
+				string receiveUrl = xmlPageRequestBody.ReceiveUrl;
+				string receiveSearch = xmlPageRequestBody.ReceiveSearch;
+				
+				GeneralClassLibrary.XmlPageRequestFrame xmlPageRequestFrame = new XmlPageRequestFrame( xmlPageRequestBody );
+
+				//	Transform the API request to an ITcpFrame.
+				byte[] sendFrameBytes = xmlPageRequestFrame.ToByteArray();
+				RequestResponseFrame requestFrame = new RequestResponseFrame( sendFrameBytes );
+
+				//	Connect to the server and obtain a network stream.
+				BufferedStream bufferedStream = await SendReceiveReply.ConnectToServer( RemoteHostName, RemotePortNumber, SizeStreamBuffer, logger );
+
+				//	Send and receive data via the stream.
+				responseFrame = await SendReceiveReply.RequestReceiveResponse( bufferedStream, requestFrame, logger );
+				ITcpFrame tcpFrame = responseFrame;
+				byte[] replyFrameBytes = tcpFrame.FramePacket;
+
+				IpcFrameBase ipcFrameBase = ( IpcFrameBase ) IpcFrameBase.FromByteArray( replyFrameBytes );
+
+				//	Transform the ITcpFrame to an API response.
+				logger.WriteEntry( methodName + " building the JSON result." );
+				XmlPageReplyFrame xmlPageReplyFrame = ( XmlPageReplyFrame ) ipcFrameBase;
+				jsonObject = new
 				{
-					logger.WriteEntry(methodName + " null receiveUrl.");
-				}
-				else
-				{
-					logger.WriteEntry(methodName + " receiveUrl = " + receiveUrl);
-				}
-				if (receiveSearch is null)
-				{
-					logger.WriteEntry(methodName + " null receiveSearch.");
-				}
-				else
-				{
-					logger.WriteEntry(methodName + " receiveSearch = " + receiveSearch);
-				}
+					textArray = xmlPageReplyFrame.ResultList,
+					isSuccess = true
+				};
 			}
 			else
 			{
-				logger.WriteEntry(methodName + " ModelState is not valid!");
+				logger.WriteEntry( methodName + " ModelState is not valid!" );
+				jsonObject = new
+				{
+					textArray = new List<string>(),
+					isSuccess = false
+				};
 			}
 
-			GeneralClassLibrary.GetWebPageIpc getWebPageIpc = new GetWebPageIpc(postQueryBody);
+			logger.WriteEntry( methodName + " exit." );
 
-			//	Transform the API request to an ITcpFrame.
-			byte[] sendFrameBytes = getWebPageIpc.ToByteArray();
-			RequestResponseFrame requestFrame = new RequestResponseFrame(sendFrameBytes);
-
-			//	Connect to the server and obtain a network stream.
-			BufferedStream bufferedStream = await SendReceiveReply.ConnectToServer(RemoteHostName, RemotePortNumber, SizeStreamBuffer, logger);
-
-			//	Send and receive data via the stream.
-			responseFrame = await SendReceiveReply.RequestReceiveResponse(bufferedStream, requestFrame, logger);
-			ITcpFrame tcpFrame = responseFrame;
-			byte[] replyFrameBytes = tcpFrame.FramePacket;
-
-			ByteArrayBase byteArrayBase = ResultWebPageIpc.FromByteArray(replyFrameBytes);
-
-			//	Transform the ITcpFrame to an API response.
-			logger.WriteEntry(methodName + " building the JSON result.");
-			object jsonObject;
-			switch (byteArrayBase.BrowserIpc)
-			{
-				case ByteArrayBase.BrowserIpcEnum.ResultWebPage:
-					ResultWebPageIpc resultWebPageIpc = (ResultWebPageIpc)byteArrayBase;
-					resultQueryBody = resultWebPageIpc.ResultQueryBody;
-					jsonObject = new
-					{
-						textArray = resultQueryBody.ResultList,
-						isSuccess = true
-					};
-					break;
-				case ByteArrayBase.BrowserIpcEnum.GetWebPage:
-				case ByteArrayBase.BrowserIpcEnum.SIZE_BrowserIpcEnum:
-				default:
-					jsonObject = new { };
-					break;
-			}
-			logger.WriteEntry(methodName + " exit.");
-
-			jsonResult = new JsonResult(jsonObject);
+			jsonResult = new JsonResult( jsonObject );
 			return jsonResult;
-			//return Ok();
 		}
 
 		[AllowAnonymous]        //	All access by any user.
-		[HttpGet("/api/QueryBrowser/Test")]
-		public IActionResult TestSendReceive(string responseText)
+		[HttpGet( "/api/QueryBrowser/Test" )]
+		public IActionResult TestSendReceive( string responseText )
 		{
 			JsonResult jsonResult;
 			ILogger logger = new ConsoleLogger();
 
 			string methodName = "TestSendReceive";
 
-			logger.WriteEntry(methodName + " entry.");
+			logger.WriteEntry( methodName + " entry." );
 
-			if (responseText == null)
+			if( responseText == null )
 			{
 				responseText = "Null responseText text.";
 			}
 
 			object jsonObject = new { reply = responseText };
-			jsonResult = new JsonResult(jsonObject);
+			jsonResult = new JsonResult( jsonObject );
 
 			return jsonResult;
-
-			//	Moved to POST.
-
-			// RequestResponseFrame responseFrame;
-			// //	Transform the API request to an ITcpFrame.
-			// byte[] sendFrameBytes = new byte[ 0 ];
-			// RequestResponseFrame requestFrame = new RequestResponseFrame( sendFrameBytes );
-
-			// //	A network stream is used to send and receive data.
-			// BufferedStream bufferedStream = await SendReceiveReply.ConnectToServer( RemoteHostName, RemotePortNumber, SizeStreamBuffer, logger );
-			// responseFrame = await SendReceiveReply.RequestReceiveResponse( bufferedStream, requestFrame, logger );
-
-			// //	Transform the ITcpFrame to an API response.
-			// logger.WriteEntry( methodName + " receive buffer stream closed." );
 		}
 	}
 }
