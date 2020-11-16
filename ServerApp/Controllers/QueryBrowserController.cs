@@ -32,7 +32,7 @@ namespace ServerApp.Controllers
 
 		//	Post-Redirect-Get pattern.
 		[AllowAnonymous]        //	All access by any user.
-		[HttpPost( "/api/QueryBrowser/Test" )]
+		[HttpPost( "/api/QueryBrowser/XmlPageAction" )]
 		public async Task<IActionResult> TestSendReceive( [FromBody] XmlPageRequestBody xmlPageRequestBody )
 		{
 			ILogger logger = new ConsoleLogger();
@@ -50,7 +50,7 @@ namespace ServerApp.Controllers
 
 				string receiveUrl = xmlPageRequestBody.ReceiveUrl;
 				string receiveSearch = xmlPageRequestBody.ReceiveSearch;
-				
+
 				GeneralClassLibrary.XmlPageRequestFrame xmlPageRequestFrame = new XmlPageRequestFrame( xmlPageRequestBody );
 
 				//	Transform the API request to an ITcpFrame.
@@ -93,7 +93,7 @@ namespace ServerApp.Controllers
 		}
 
 		[AllowAnonymous]        //	All access by any user.
-		[HttpGet( "/api/QueryBrowser/Test" )]
+		[HttpGet( "/api/QueryBrowser/XmlPageAction" )]
 		public IActionResult TestSendReceive( string responseText )
 		{
 			JsonResult jsonResult;

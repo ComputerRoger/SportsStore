@@ -25,6 +25,7 @@ namespace BrowserFormServer
 			BrowserDocument = new BrowserDocument();
 
 			InitializeComponent();
+			SecureBrowserControl();
 			HookupEvents();
 		}
 
@@ -37,6 +38,13 @@ namespace BrowserFormServer
 
 		#region Methods.
 
+		protected void SecureBrowserControl()
+		{
+			bool isWebMessageEnabled = BrowserControl.IsWebMessageEnabled;
+			bool isScriptEnabled = BrowserControl.IsScriptEnabled;
+			bool areDefaultScriptDialogsEnabled = BrowserControl.AreDefaultScriptDialogsEnabled;
+		}
+
 		public delegate string BrowserWorkDelegate( string url );
 
 		//	The delegate should match this method.
@@ -44,7 +52,6 @@ namespace BrowserFormServer
 		{
 			string resultText;
 
-			resultText = "";
 			//	Prepare to wait for results.
 
 			BrowserDocument.NavigateManualResetEvent = new ManualResetEvent( false );
@@ -111,9 +118,6 @@ namespace BrowserFormServer
 			xmlText = HtmlToXml( htmlText );
 			browserDocument.XmlText = xmlText;
 
-			//string clearHtml = BrowserDocument.RemoveNonContent( htmlText );
-			//string clearXml = BrowserDocument.RemoveNonContent( xmlText );
-
 			//	Signal that navigation has completed and results have been parsed.
 			NavigationResults = browserDocument.DomText;
 			BrowserDocument.NavigateManualResetEvent.Set();
@@ -135,6 +139,40 @@ namespace BrowserFormServer
 		protected void HookupEvents()
 		{
 			BrowserControl.NavigationCompleted += BrowserControl_NavigationCompleted;
+			BrowserControl.ScriptDialogOpening += BrowserControl_ScriptDialogOpening;
+			BrowserControl.WebMessageRecieved += BrowserControl_WebMessageRecieved;
+			BrowserControl.ProcessFailed += BrowserControl_ProcessFailed;
+			BrowserControl.PermissionRequested += BrowserControl_PermissionRequested;
+			BrowserControl.ContentLoading += BrowserControl_ContentLoading;
+		}
+
+		private void BrowserControl_ContentLoading( object sender, ContentLoadingEventArgs e )
+		{
+			//	1.	Navigation Starting.
+			//	2.	Source Changed.
+			//	3.	ContentLoading.
+			//	4.	HistoryChanged.
+			//	5.	NavigationCompleted.
+		}
+
+		private void BrowserControl_PermissionRequested( object sender, PermissionRequestedEventArgs e )
+		{
+			//	Log this.
+		}
+
+		private void BrowserControl_ProcessFailed( object sender, ProcessFailedEventArgs e )
+		{
+			//	Log this.
+		}
+
+		private void BrowserControl_WebMessageRecieved( object sender, WebMessageReceivedEventArgs e )
+		{
+			//	Perhaps look for this event.
+		}
+
+		private void BrowserControl_ScriptDialogOpening( object sender, ScriptDialogOpeningEventArgs e )
+		{
+			//	Capture Captcha here.
 		}
 
 		private void BrowserForm_Load( object sender, EventArgs e )

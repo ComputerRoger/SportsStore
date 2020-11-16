@@ -7,21 +7,22 @@ using GeneralClassLibrary;
 
 namespace AsyncSockets
 {
-	public class AsyncReceive
+	//	Early development of asynchronous tcp/ip before async/await.
+	public class BeginEndReceive
 	{
 		// State object for receiving data.  
-		protected class AsyncReceiveState
+		protected class CallbackReceiveState
 		{
 			public int SizeTcpByteArray { get; protected set; }
 			public byte[] ReceiveBuffer { get; protected set; }
 			public StringBuilder Sb { get; protected set; }
 
-			public AsyncReceiveState()
+			public CallbackReceiveState()
 			{
-				InitializeAsyncReceiveState();
+				InitializeCallbackReceiveState();
 			}
 
-			public void InitializeAsyncReceiveState()
+			public void InitializeCallbackReceiveState()
 			{
 				Sb = new StringBuilder();
 				SizeTcpByteArray = 65000;
@@ -29,7 +30,7 @@ namespace AsyncSockets
 			}
 		}
 
-		public AsyncReceive( Socket connectedSocket, ILogger logger )
+		public BeginEndReceive( Socket connectedSocket, ILogger logger )
 		{
 			ConnectedSocket = connectedSocket;
 			Logger = logger;
@@ -42,7 +43,7 @@ namespace AsyncSockets
 
 		protected ManualResetEvent ReceiveDoneEvent { get; set; } = new ManualResetEvent( false );
 		public string ReceivedText { get; protected set; } = "";
-		protected AsyncReceiveState ReceiveState { get; set; }
+		protected CallbackReceiveState ReceiveState { get; set; }
 
 		#endregion
 
@@ -50,7 +51,7 @@ namespace AsyncSockets
 		{
 			ReceivedText = "";
 			ReceiveDoneEvent.Reset();
-			ReceiveState = new AsyncReceiveState();
+			ReceiveState = new CallbackReceiveState();
 		}
 
 		private void BeginReceive()
@@ -92,7 +93,7 @@ namespace AsyncSockets
 			try
 			{
 				// Retrieve the state object and the clientSocket socket from the asynchronous state object.  
-				AsyncReceiveState asyncReceiveState = ( AsyncReceiveState ) asyncResult.AsyncState;
+				CallbackReceiveState callbackReceiveState = ( CallbackReceiveState ) asyncResult.AsyncState;
 
 				// Read data from the remote device.  
 				int bytesRead = ConnectedSocket.EndReceive( asyncResult );
@@ -102,8 +103,8 @@ namespace AsyncSockets
 					Logger.WriteEntry( "ReceiveCallBack() Received " + bytesRead.ToString() );
 
 					// Accumulate the received text. 
-					string receivedText = Encoding.ASCII.GetString( asyncReceiveState.ReceiveBuffer, 0, bytesRead );
-					asyncReceiveState.Sb.Append( receivedText );
+					string receivedText = Encoding.ASCII.GetString( callbackReceiveState.ReceiveBuffer, 0, bytesRead );
+					callbackReceiveState.Sb.Append( receivedText );
 
 					// Recursively get the rest of the data.  
 					BeginReceive();
@@ -113,9 +114,9 @@ namespace AsyncSockets
 					Logger.WriteEntry( "ReceiveCallBack() Received 0 bytes.  Should be done. " );
 
 					//	All the text has arrived.  
-					if( asyncReceiveState.Sb.Length > 1 )
+					if( callbackReceiveState.Sb.Length > 1 )
 					{
-						this.ReceivedText = asyncReceiveState.Sb.ToString();
+						this.ReceivedText = callbackReceiveState.Sb.ToString();
 					}
 					Logger.WriteEntry( "ReceiveDoneEvent.Set() to signal completion." );
 					//	Signal the completion of the message.  

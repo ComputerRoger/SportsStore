@@ -29,15 +29,17 @@ namespace AsyncSockets
 			// Establish the remote endpoint for the socket.  
 			IPHostEntry ipHostInfo = Dns.GetHostEntry( serverHostName );
 			IPAddress ipAddress = ipHostInfo.AddressList[ 0 ];
-			IPEndPoint serverEndPoint = new IPEndPoint( ipAddress, serverPortNumber );
+			//IPEndPoint serverEndPoint = new IPEndPoint( ipAddress, serverPortNumber );
 
 			// Create a TCP/IP socket. 
 			Socket clientSocket = new Socket( ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp );
 			await clientSocket.ConnectAsync( serverHostName, serverPortNumber );
 
 			//	Convert the connected socket to a TcpClient.
-			TcpClient tcpClient = new TcpClient();
-			tcpClient.Client = clientSocket;
+			TcpClient tcpClient = new TcpClient
+			{
+				Client = clientSocket
+			};
 
 			//	A network stream is used to send and receive data.
 			NetworkStream networkStream = tcpClient.GetStream();
@@ -118,16 +120,12 @@ namespace AsyncSockets
 			return tcpFrame;
 		}
 
+		//	Client IPC Cycle.
 		//	Send a request. Receive the response.
 		static public async Task<RequestResponseFrame> RequestReceiveResponse( BufferedStream bufferedStream, ITcpFrame sendTcpFrame, ILogger logger )
 		{
-			int numberSent;
-
-			int sendFrameSize = sendTcpFrame.FramePacket.Length;
-			byte[] sendFrameBytes = sendTcpFrame.FramePacket;
-
 			//	Send the request to the server.
-			numberSent = await SendFrame( sendTcpFrame, bufferedStream, logger );
+			await SendFrame( sendTcpFrame, bufferedStream, logger );
 
 			//	Receive the response from the server.
 			ITcpFrame tcpFrame;
@@ -138,6 +136,7 @@ namespace AsyncSockets
 			return responseFrame;
 		}
 
+		//	Server IPC Cycle.
 		//	Receive a request. Service the request. Reply with the result.
 		static public async Task<int> ReceiveServiceReply( BufferedStream bufferedStream, IServiceRequest serviceRequest, ILogger logger, IAppDocument appDocument )
 		{
@@ -146,8 +145,10 @@ namespace AsyncSockets
 			//	Receive the request from the client.
 			ITcpFrame requestFrame = await ReceiveFrame( bufferedStream, logger );
 
-			//	Service the request.
+			//	Identify and create the specific service to be performed.
 			IPerformService performService = serviceRequest.CreateService( requestFrame, logger );
+
+			//	Perform the specific service and provide a response.
 			ITcpFrame responseFrame = performService.PerformService( logger, appDocument );
 
 			//	Reply the response to the client.
@@ -158,7 +159,7 @@ namespace AsyncSockets
 
 	public class RequestResponseFrame : ITcpFrame
 	{
-		private byte[] m_FramePacket;
+		private readonly byte[] m_FramePacket;
 
 		public RequestResponseFrame( byte[] framePacket )
 		{

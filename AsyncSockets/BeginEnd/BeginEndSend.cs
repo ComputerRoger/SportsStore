@@ -7,9 +7,10 @@ using GeneralClassLibrary;
 
 namespace AsyncSockets
 {
-	public class AsyncSend
+	//	Early development of asynchronous tcp/ip before async/await.
+	public class BeginEndSend
 	{
-		public AsyncSend( Socket connectedSocket, ILogger logger )
+		public BeginEndSend( Socket connectedSocket, ILogger logger )
 		{
 			ConnectedSocket = connectedSocket;
 			Logger = logger;
@@ -17,6 +18,7 @@ namespace AsyncSockets
 		}
 
 		#region Properties.
+
 		public Socket ConnectedSocket { get; protected set; }
 		public ILogger Logger { get; protected set; }
 		public ManualResetEvent SendDoneEvent { get; protected set; } = new ManualResetEvent( false );

@@ -9,13 +9,16 @@ import { Order, OrderConfirmation } from './order.model';
 import { SignalRService } from "./signalR.service";
 
 //	Define the MVC Route patterns associated with Controller prefixes.
-const productsUrl = "/api/productvalues";			//	ProductValuesController
-const suppliersUrl = "/api/suppliervalues";			//	SupplierValuesController
-const sessionUrl = "/api/session";					//	SessionValuesController
-const ordersUrl = "/api/orders";					//	OrderValuessController
-const accountUrl = "/api/account";					//	AccountController
-//const queryBrowserUrl = "/api/queryBrowser";		//	QueryBrowserController
-const queryBrowserUrl = "/api/queryBrowser";		//	QueryBrowserController
+const productsController = "/api/productvalues";			//	ProductValuesController
+const suppliersController = "/api/suppliervalues";			//	SupplierValuesController
+const sessionController = "/api/session";					//	SessionValuesController
+const ordersController = "/api/orders";					//	OrderValuessController
+const accountController = "/api/account";					//	AccountController
+const queryBrowserController = "/api/queryBrowser";		//	QueryBrowserController
+
+const xmlPageAction = "/XmlPageAction";
+const loginAction = "/login";
+const logoutAction = "/logout";
 
 //	The client and server keys of this type must match.
 type ProductsMetadata =
@@ -70,14 +73,14 @@ export class Repository
 
 	queryBrowserGet()
 	{
-		let actionPath = queryBrowserUrl + "/Test";
+		let actionPath = queryBrowserController + xmlPageAction;
 		this.httpClient.get<String>(actionPath).subscribe(() => { });
 	}
 
 
 	queryBrowserPost(postQueryBody: PostQueryBody)
 	{
-		let actionPath = queryBrowserUrl + "/Test";
+		let actionPath = queryBrowserController + xmlPageAction;
 		let queryBrowserResult = this.httpClient.post<QueryBrowserResult>(actionPath, postQueryBody);
 		return queryBrowserResult;
 	}
@@ -86,7 +89,7 @@ export class Repository
 
 	login(name: string, password: string): Observable<boolean>
 	{
-		let actionPath = accountUrl + "/login";
+		let actionPath = accountController + loginAction;
 		return this.httpClient.post<boolean>(actionPath,
 			{
 				name: name,
@@ -96,7 +99,7 @@ export class Repository
 
 	logout()
 	{
-		let actionPath = accountUrl + "/logout";
+		let actionPath = accountController + logoutAction;
 		this.httpClient.post(actionPath, null).subscribe(() => { });
 	}
 
@@ -104,14 +107,14 @@ export class Repository
 
 	storeSessionData<T>(dataType: string, data: T)
 	{
-		let endPoint = `${sessionUrl}/${dataType}`;
+		let endPoint = `${sessionController}/${dataType}`;
 		return this.httpClient.post(endPoint, data)
 			.subscribe(foo => { });
 	}
 
 	getSessionData<T>(dataType: string): Observable<T>
 	{
-		let endPoint = `${sessionUrl}/${dataType}`;
+		let endPoint = `${sessionController}/${dataType}`;
 		let data = this.httpClient.get<T>(endPoint);
 		return data;
 	}
@@ -120,7 +123,7 @@ export class Repository
 
 	getOrders()
 	{
-		this.httpClient.get<Order[]>(ordersUrl)
+		this.httpClient.get<Order[]>(ordersController)
 			.subscribe(data => this.orders = data);
 	}
 
@@ -134,7 +137,7 @@ export class Repository
 
 	createOrder(order: Order)
 	{
-		this.httpClient.post<OrderConfirmation>(ordersUrl,
+		this.httpClient.post<OrderConfirmation>(ordersController,
 			{
 				name: order.name,
 				address: order.address,
@@ -153,7 +156,7 @@ export class Repository
 
 	shipOrder(order: Order)
 	{
-		this.httpClient.post(`${ordersUrl}/${order.orderId}`,
+		this.httpClient.post(`${ordersController}/${order.orderId}`,
 			{}).subscribe(() => this.getOrders());
 	}
 
@@ -163,7 +166,7 @@ export class Repository
 	//  Get a product.
 	getProduct(idProduct: number)
 	{
-		let endPoint = `${productsUrl}/${idProduct}`;
+		let endPoint = `${productsController}/${idProduct}`;
 		this.httpClient.get<Product>(endPoint).subscribe(p => this.productData = p);
 		console.log("Product Data Received.");
 	}
@@ -173,7 +176,7 @@ export class Repository
 		console.log("Products Requested.");
 		this.signalRService.broadcastMessage("A message broadcast during getProducts.");
 
-		let endPoint = `${productsUrl}?isRelatedRequired=${this.filter.related}`;
+		let endPoint = `${productsController}?isRelatedRequired=${this.filter.related}`;
 		if (this.filter.category)
 		{
 			endPoint += `&category=${this.filter.category}`;
@@ -200,7 +203,7 @@ export class Repository
 	//  Get a supplier.
 	getSupplier(idSupplier: number)
 	{
-		let endPoint = `${suppliersUrl}/${idSupplier}`;
+		let endPoint = `${suppliersController}/${idSupplier}`;
 		this.httpClient.get<Supplier>(endPoint).subscribe(s => this.supplierData = s);
 		console.log("Supplier Data Received.");
 	}
@@ -208,7 +211,7 @@ export class Repository
 	getSuppliers()
 	{
 		console.log("Suppliers Requested.");
-		let endPoint = `${suppliersUrl}`;
+		let endPoint = `${suppliersController}`;
 
 		this.httpClient.get<Supplier[]>(endPoint)
 			.subscribe(suppliers => this.suppliers = suppliers);
@@ -229,7 +232,7 @@ export class Repository
 		}
 
 		//	Post the object.
-		this.httpClient.post<number>(productsUrl, productData)
+		this.httpClient.post<number>(productsController, productData)
 			.subscribe(id =>
 			{
 				//	The new primary key is returned.
@@ -252,7 +255,7 @@ export class Repository
 		};
 
 		//	Post the foreign key object first.
-		this.httpClient.post<number>(suppliersUrl, supplierData)
+		this.httpClient.post<number>(suppliersController, supplierData)
 			.subscribe(id =>
 			{
 				supplier.supplierId = id;
@@ -281,7 +284,7 @@ export class Repository
 		}
 
 		//	HTTP PUT the object with the id attached to the URL.
-		this.httpClient.put(productsUrl + `/${product.productId}`, productData)
+		this.httpClient.put(productsController + `/${product.productId}`, productData)
 			.subscribe(() =>
 			{
 				//	Refresh the products property.
@@ -300,7 +303,7 @@ export class Repository
 		}
 
 		//	HTTP PUT the object with the id attached to the URL.
-		this.httpClient.put(suppliersUrl + `/${supplier.supplierId}`, supplierData)
+		this.httpClient.put(suppliersController + `/${supplier.supplierId}`, supplierData)
 			.subscribe(() =>
 			{
 				//	Refresh the suppliers property.
@@ -325,7 +328,7 @@ export class Repository
 				}));
 
 		//	Send the patch and update the repository.
-		this.httpClient.patch(`${productsUrl}/${id}`, patch)
+		this.httpClient.patch(`${productsController}/${id}`, patch)
 			.subscribe(() => this.getProducts());
 	}
 
@@ -335,7 +338,7 @@ export class Repository
 	{
 
 		//	Send the patch and update the repository.
-		this.httpClient.delete(`${productsUrl}/${id}`)
+		this.httpClient.delete(`${productsController}/${id}`)
 			.subscribe(() => this.getProducts());
 	}
 
@@ -343,7 +346,7 @@ export class Repository
 	{
 
 		//	Send the patch and update the repository.
-		this.httpClient.delete(`${suppliersUrl}/${id}`)
+		this.httpClient.delete(`${suppliersController}/${id}`)
 			.subscribe(() =>
 			{
 				this.getProducts();

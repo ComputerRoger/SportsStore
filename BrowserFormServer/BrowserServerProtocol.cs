@@ -32,12 +32,7 @@ namespace BrowserFormServer
 		public int SizeStreamBuffer { get; protected set; }
 		public IServiceRequest ServiceRequest { get; protected set; }
 
-		//	Do application specific work here.
-		//	It could be a looped protocol exchanging a series of instructions.
-		//	Or it could be a simple receive and reply.
-		//	The client should close the socket.
-		//	However, in HTTP, it is the server that closes the connection.
-		//	That is why HTTP is a connectionless protocol.
+		//	Handle one connection cycle of Receive - Service - Reply.
 		public async void HandleClientConnection( object appDocument )
 		{
 			BufferedStream bufferedStream;

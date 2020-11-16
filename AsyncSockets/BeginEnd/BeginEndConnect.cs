@@ -7,9 +7,10 @@ using GeneralClassLibrary;
 
 namespace AsyncSockets
 {
-	public class AsyncConnect
+	//	Early development of asynchronous tcp/ip before async/await.
+	public class BeginEndConnect
 	{
-		public AsyncConnect( string serverHostName, int serverPortNumber, ILogger logger )
+		public BeginEndConnect( string serverHostName, int serverPortNumber, ILogger logger )
 		{
 			ServerHostName = serverHostName;
 			ServerPortNumber = serverPortNumber;

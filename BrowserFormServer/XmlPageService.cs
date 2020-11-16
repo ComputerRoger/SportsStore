@@ -29,7 +29,7 @@ namespace BrowserFormServer
 			BrowserForm browserForm = ( BrowserForm ) mainForm.Invoke( startBrowserFormDelegate );
 
 			//	Decode the request and generate a response.
-			ITcpFrame responseFrame = BuildResponse( browserForm, appDocument );
+			ITcpFrame responseFrame = BuildResponse( browserForm );
 
 			//	Stop the browser.
 			MainForm.StopBrowserFormDelegate stopBrowserFormDelegate;
@@ -61,7 +61,7 @@ namespace BrowserFormServer
 			string result = this.NavigteToUrl( browserForm, url );
 			return ( result );
 		}
-		public ITcpFrame BuildResponse( BrowserForm browserForm, AppDocument appDocument )
+		public ITcpFrame BuildResponse( BrowserForm browserForm )
 		{
 			XmlPageRequestBody xmlPageRequestBody;
 			XmlPageRequestFrame xmlPageRequestFrame;
@@ -82,12 +82,13 @@ namespace BrowserFormServer
 			string domText = browserDocument.DomText;
 			string xmlText = browserDocument.XmlText;
 
-			List<string> textList = new List<string>();
-
-			textList.Add( domText );
-			textList.Add( xmlText );
-			textList.Add( browserDocument.DomContentOnly() );
-			textList.Add( browserDocument.XmlContentOnly() );
+			List<string> textList = new List<string>
+			{
+				domText,
+				xmlText,
+				browserDocument.DomContentOnly(),
+				browserDocument.XmlContentOnly()
+			};
 
 			//	Frame the results.
 			XmlPageReplyFrame xmlPageReplyFrame = new XmlPageReplyFrame( textList );
@@ -101,21 +102,3 @@ namespace BrowserFormServer
 	}
 }
 
-
-
-//	HtmlDecode works.	Must be lowercase.
-//string sampleHtml = "&lt;strong&gt;bold &LT/strong&GT;test";
-//var resultHtml = System.Web.HttpUtility.HtmlDecode( sampleHtml );
-// result = "<strong>bold </strong>test"
-
-
-//	UrlDecode works.
-//string sampleUrl = "test %3cstrong%3ebold %3c/strong%3etest";
-//string sampleUrl = "test %3cstrong%3ebold %3C/strong%3Etest";
-//var resultUrl = System.Web.HttpUtility.UrlDecode( sampleUrl );
-// result = "<strong>bold </strong>test"
-
-
-//string sampleUrl = "test %3cstrong%3ebold %3c/strong%3etest";
-//string sampleUrl = "https://images-na.ssl-images-amazon.com/images/I/41icwgAxVqL._RC|71RKo6SPKEL.css,21qFIynv1ZL.css,31FX6DlOvlL.css,21lRUdwotiL.css,41oKRlyPnmL.css,11G4HxMtMSL.css,31OvHRW XiL.css,01XHMOHpK1L.css_.css?AUIClients/NavDesktopUberAsset&amp;yKDHSa d#desktop.309131-T1";
-//var resultUrl = System.Web.HttpUtility.UrlDecode( sampleUrl );

@@ -41,9 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncConnect.cs" />
-    <Compile Include="AsyncReceive.cs" />
-    <Compile Include="AsyncSend.cs" />
+    <Compile Include="BeginEnd\BeginEndConnect.cs" />
+    <Compile Include="BeginEnd\BeginEndReceive.cs" />
+    <Compile Include="BeginEnd\BeginEndSend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
